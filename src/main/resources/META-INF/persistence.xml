@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.1" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="OssimSiemPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>com.aegis.ossimsiem.Schema</class>
+    <class>com.aegis.ossimsiem.PoAcidEvent</class>
+    <class>com.aegis.ossimsiem.ReputationData</class>
+    <class>com.aegis.ossimsiem.SigReference</class>
+    <class>com.aegis.ossimsiem.OtxData</class>
+    <class>com.aegis.ossimsiem.AcAcidEvent</class>
+    <class>com.aegis.ossimsiem.Device</class>
+    <class>com.aegis.ossimsiem.AcidEvent</class>
+    <class>com.aegis.ossimsiem.ExtraData</class>
+    <class>com.aegis.ossimsiem.ReferenceSystem</class>
+    <class>com.aegis.ossimsiem.Reference</class>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/alienvault_siem?zeroDateTimeBehavior=convertToNull"/>
+      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+    </properties>
+  </persistence-unit>
+</persistence>
