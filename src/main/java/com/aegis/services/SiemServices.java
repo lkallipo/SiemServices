@@ -26,7 +26,7 @@ import javax.ws.rs.core.MediaType;
  * @author lkallipolitis
  */
 @Stateless
-@Path("siem")
+@Path("api")
 public class SiemServices {
 
     @PersistenceContext(unitName = "OssimSiemPU")
