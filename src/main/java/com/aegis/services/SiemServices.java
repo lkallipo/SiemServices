@@ -74,10 +74,10 @@ public class SiemServices {
     }
     
     @GET
-    @Path("/getExtraData")
+    @Path("/getCurrentLoad")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public GetExtraDataResponse getExtraData(@QueryParam("startTimestamp") String timestamp) throws ClassNotFoundException {
+    public GetExtraDataResponse getCurrentLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetExtraDataResponse response;
@@ -86,7 +86,59 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Current Load",Long.parseLong(timestamp));
+        response = handler.getExtraData("Current Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost);
+        return response;
+    }
+    
+        
+    @GET
+    @Path("/getServerLoad")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetExtraDataResponse getServerLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetExtraDataResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getExtraData("Server Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost);
+        return response;
+    }
+    
+    @GET
+    @Path("/getCurrentProcesses")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetExtraDataResponse getCurrentProcesses(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetExtraDataResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getExtraData("Total Processes",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost);
+        return response;
+    }
+    
+        @GET
+    @Path("/getCurrentUsers")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetExtraDataResponse getCurrentUsers(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetExtraDataResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getExtraData("Current Users",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost);
         return response;
     }
 }
