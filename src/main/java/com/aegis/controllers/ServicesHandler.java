@@ -157,7 +157,7 @@ public class ServicesHandler {
     /*
     * Gets extradata that associated Event happened after startDate
     */
-     public GetExtraDataResponse getExtraData(String userDataValue, long startDate) {
+     public GetExtraDataResponse getExtraData(String userDataValue, long startDate, long endDate, String srcHost) {
         //*********************** Variables ***************************
         GetExtraDataResponse response = new GetExtraDataResponse();
         List<ExtraData> extraDataparamsList;
@@ -182,26 +182,115 @@ public class ServicesHandler {
                     query1.setParameter("eventId", extra.getEventId());                    
                     AcidEvent relatedAcidEvent = query1.getSingleResult();
                     
-                    if(relatedAcidEvent.getTimestamp().getTime() >= startDate)
+                    /* Assign checkHostName the name of the event by default
+                       but if passed as a parameter then set it to it.
+                    */
+                    String checkHostName = relatedAcidEvent.getSrcHostname();
+                    if(!srcHost.equals("any"))
                     {
-                        extraDataList.add(new GetExtraDataListResponse(
-                            extra.getEventId(),
-                            extra.getFilename(),
-                            extra.getUsername(),
-                            extra.getPassword(),
-                            extra.getUserdata1(),
-                            extra.getUserdata2(),
-                            extra.getUserdata3(),
-                            extra.getUserdata4(),
-                            extra.getUserdata5(),
-                            extra.getUserdata6(),
-                            extra.getUserdata7(),
-                            extra.getUserdata8(),
-                            extra.getUserdata9(),
-                            extra.getDataPayload(),
-                            extra.getBinaryData(),
-                            relatedAcidEvent
-                        ));
+                        checkHostName = srcHost;
+                    }
+                    
+                    if( relatedAcidEvent.getSrcHostname().equals(checkHostName) &&
+                        relatedAcidEvent.getTimestamp().getTime() >= startDate &&
+                        relatedAcidEvent.getTimestamp().getTime() <= endDate)
+                    {  
+                        
+                        GetAcidEventsListResponse acideventResponse = new 
+                            GetAcidEventsListResponse(
+                                relatedAcidEvent.getId(),
+                                relatedAcidEvent.getDeviceId(),
+                                relatedAcidEvent.getCtx(),
+                                relatedAcidEvent.getTimestamp(),
+                                null, // no extra needed here
+                                getIpfromBytes(relatedAcidEvent.getIpSrc()),
+                                getIpfromBytes(relatedAcidEvent.getIpDst()),
+                                relatedAcidEvent.getIpProto(),
+                                relatedAcidEvent.getLayer4Sport(),
+                                relatedAcidEvent.getLayer4Dport(),
+                                relatedAcidEvent.getOssimPriority(),
+                                relatedAcidEvent.getOssimReliability(),
+                                relatedAcidEvent.getOssimAssetSrc(),
+                                relatedAcidEvent.getOssimAssetDst(),
+                                relatedAcidEvent.getOssimRiskC(),
+                                relatedAcidEvent.getOssimRiskA(),
+                                relatedAcidEvent.getPluginId(),
+                                relatedAcidEvent.getPluginSid(),
+                                relatedAcidEvent.getTzone(),
+                                relatedAcidEvent.getOssimCorrelation(),
+                                relatedAcidEvent.getSrcHostname(),
+                                relatedAcidEvent.getDstHostname(),
+                                getIpfromBytes(relatedAcidEvent.getSrcMac()),
+                                getIpfromBytes(relatedAcidEvent.getDstMac()),
+                                getIpfromBytes(relatedAcidEvent.getSrcHost()),
+                                getIpfromBytes(relatedAcidEvent.getDstHost()),
+                                getIpfromBytes(relatedAcidEvent.getSrcNet()),
+                                getIpfromBytes(relatedAcidEvent.getDstNet()));
+
+
+                        if (userDataValue.equals("Server Load")) {
+                            String[] loadvalues = new String[3];
+                            String values = "";
+                            if (extra.getUserdata5().contains("average")) {
+                                values = extra.getUserdata5();
+                            } else if (extra.getUserdata4().contains("average")) {
+                                values = extra.getUserdata4();
+                            }
+                            if (!values.equals("")) {
+                                String loadvalue = values.substring(values.lastIndexOf("average: ") + 9);
+                                loadvalues = loadvalue.split(", ");
+                                extraDataList.add(new GetExtraDataListResponse(
+                                        extra.getEventId(),
+                                        extra.getUserdata1(),
+                                        extra.getUserdata2(),
+                                        extra.getUserdata3(),
+                                        extra.getUserdata4(),
+                                        extra.getUserdata5(),
+                                        extra.getUserdata6(),
+                                        extra.getUserdata7(),
+                                        extra.getUserdata8(),
+                                        extra.getUserdata9(),
+                                        extra.getDataPayload(),
+                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                        loadvalues[0],
+                                        loadvalues[1],
+                                        loadvalues[2].substring(0,loadvalues[2].indexOf("\n")),
+                                        null,
+                                        acideventResponse
+                                ));
+                            }
+                        }
+                        else if(userDataValue.equals("Total Processes")){
+                            String values = "";
+                            if (extra.getUserdata4().contains("processes")) {
+                                values = extra.getUserdata4();
+                            } else if (extra.getUserdata5().contains("processes")) {
+                                values = extra.getUserdata5();
+                            }
+                            if (!values.equals("")) {
+                                String loadvalue = values.substring(values.lastIndexOf(": ") + 2, values.lastIndexOf(" processes"));
+                                
+                                extraDataList.add(new GetExtraDataListResponse(
+                                        extra.getEventId(),
+                                        extra.getUserdata1(),
+                                        extra.getUserdata2(),
+                                        extra.getUserdata3(),
+                                        extra.getUserdata4(),
+                                        extra.getUserdata5(),
+                                        extra.getUserdata6(),
+                                        extra.getUserdata7(),
+                                        extra.getUserdata8(),
+                                        extra.getUserdata9(),
+                                        extra.getDataPayload(),
+                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                        null,
+                                        null,
+                                        null,
+                                        loadvalue,
+                                        acideventResponse
+                                ));
+                            }
+                        }
                     } 
                 }
                 response.setExtraData(extraDataList);
