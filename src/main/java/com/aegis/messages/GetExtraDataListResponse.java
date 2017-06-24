@@ -19,12 +19,6 @@ public class GetExtraDataListResponse {
 
     private byte[] eventId;
 
-    private String filename;
-
-    private String username;
-
-    private String password;
-
     private String userdata1;
 
     private String userdata2;
@@ -44,16 +38,21 @@ public class GetExtraDataListResponse {
     private String userdata9;
 
     private String dataPayload;
-
-    private byte[] binaryData;
     
-    private AcidEvent relatedEvent;
+    private String severity;
+   
+    private String load1min;
 
-    public GetExtraDataListResponse(byte[] eventId, String filename, String username, String password, String userdata1, String userdata2, String userdata3, String userdata4, String userdata5, String userdata6, String userdata7, String userdata8, String userdata9, String dataPayload, byte[] binaryData, AcidEvent relatedEvent) {
+    private String load5min;
+
+    private String load15min;
+    
+    private String totalprocesses;
+
+    private GetAcidEventsListResponse relatedEvent;
+
+    public GetExtraDataListResponse(byte[] eventId, String userdata1, String userdata2, String userdata3, String userdata4, String userdata5, String userdata6, String userdata7, String userdata8, String userdata9, String dataPayload, String severity, String load1min, String load5min, String load15min, String totalprocesses, GetAcidEventsListResponse relatedEvent) {
         this.eventId = eventId;
-        this.filename = filename;
-        this.username = username;
-        this.password = password;
         this.userdata1 = userdata1;
         this.userdata2 = userdata2;
         this.userdata3 = userdata3;
@@ -64,7 +63,11 @@ public class GetExtraDataListResponse {
         this.userdata8 = userdata8;
         this.userdata9 = userdata9;
         this.dataPayload = dataPayload;
-        this.binaryData = binaryData;
+        this.severity = severity;
+        this.load1min = load1min;
+        this.load5min = load5min;
+        this.load15min = load15min;
+        this.totalprocesses = totalprocesses;
         this.relatedEvent = relatedEvent;
     }
 
@@ -74,30 +77,6 @@ public class GetExtraDataListResponse {
 
     public void setEventId(byte[] eventId) {
         this.eventId = eventId;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getUserdata1() {
@@ -179,20 +158,52 @@ public class GetExtraDataListResponse {
     public void setDataPayload(String dataPayload) {
         this.dataPayload = dataPayload;
     }
-
-    public byte[] getBinaryData() {
-        return binaryData;
+    
+    public String getSeverity() {
+        return severity;
     }
 
-    public void setBinaryData(byte[] binaryData) {
-        this.binaryData = binaryData;
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+    
+        public String getLoad1min() {
+        return load1min;
     }
 
-    public AcidEvent getRelatedEvent() {
+    public void setLoad1min(String load1min) {
+        this.load1min = load1min;
+    }
+
+    public String getLoad5min() {
+        return load5min;
+    }
+
+    public void setLoad5min(String load5min) {
+        this.load5min = load5min;
+    }
+
+    public String getLoad15min() {
+        return load15min;
+    }
+
+    public void setLoad15min(String load15min) {
+        this.load15min = load15min;
+    }   
+    
+    public String getTotalprocesses() {
+        return totalprocesses;
+    }
+
+    public void setTotalprocesses(String totalprocesses) {
+        this.totalprocesses = totalprocesses;
+    }
+
+    public GetAcidEventsListResponse getRelatedEvent() {
         return relatedEvent;
     }
 
-    public void setRelatedEvent(AcidEvent relatedEvent) {
+    public void setRelatedEvent(GetAcidEventsListResponse relatedEvent) {
         this.relatedEvent = relatedEvent;
     }
     
