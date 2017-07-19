@@ -9,6 +9,7 @@ import com.aegis.messages.GetAcidEventsListResponse;
 import com.aegis.messages.GetAcidEventsResponse;
 import com.aegis.messages.GetDevicesListResponse;
 import com.aegis.messages.GetDevicesResponse;
+import com.aegis.messages.GetEventsTimeframeResponse;
 import com.aegis.messages.GetExtraDataListResponse;
 import com.aegis.messages.GetExtraDataResponse;
 import com.aegis.ossimsiem.AcidEvent;
@@ -152,6 +153,46 @@ public class ServicesHandler {
         }
         return response;
     }//end getAcidEvents
+    
+    
+    public GetEventsTimeframeResponse getAcidEventsTimeframe() {
+        //*********************** Variables ***************************
+        GetEventsTimeframeResponse response = null;
+        Date oldest = new Date();
+        Date newest = new Date();
+        List<AcidEvent> oldestEventsList;
+        List<AcidEvent> newestEventsList;
+
+        //*********************** Action ***************************
+        try {
+            //we use list to avoid "not found" exception
+            oldestEventsList = em.createQuery("SELECT a FROM AcidEvent a ORDER BY a.timestamp ASC").setMaxResults(1).getResultList();
+            newestEventsList = em.createQuery("SELECT a FROM AcidEvent a ORDER BY a.timestamp DESC").setMaxResults(1).getResultList();
+
+            //if we found no results, no events are stored so return empty list
+            if (!oldestEventsList.isEmpty()) {        
+
+                for (AcidEvent oldestEvent : oldestEventsList) {                    
+                    oldest = oldestEvent.getTimestamp();
+                    break; // we have one result anyway                   
+                }
+                
+                for (AcidEvent latestEvent : newestEventsList) {                    
+                    newest = latestEvent.getTimestamp();
+                    break; // we have one result anyway                   
+                }               
+                
+                response = new GetEventsTimeframeResponse(oldest,newest);
+                return response;
+            } else {                
+                response = new GetEventsTimeframeResponse(null,null);
+                return response;
+            }
+
+        } catch (Exception e) {
+        }
+        return response;
+    }//end getAcidEventsTimeframe
     
     
     /*

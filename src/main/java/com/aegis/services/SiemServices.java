@@ -8,6 +8,7 @@ package com.aegis.services;
 import com.aegis.controllers.ServicesHandler;
 import com.aegis.messages.GetAcidEventsResponse;
 import com.aegis.messages.GetDevicesResponse;
+import com.aegis.messages.GetEventsTimeframeResponse;
 import com.aegis.messages.GetExtraDataResponse;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -70,6 +71,23 @@ public class SiemServices {
         }
         handler = new ServicesHandler(em);
         response = handler.getAcidEvents();
+        return response;
+    }
+    
+    @GET
+    @Path("/getEventsTimeframe")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetEventsTimeframeResponse getAcidEventsTimeframe() throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetEventsTimeframeResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getAcidEventsTimeframe();
         return response;
     }
     
