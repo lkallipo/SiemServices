@@ -332,6 +332,40 @@ public class ServicesHandler {
                                 ));
                             }
                         }
+                        else if(userDataValue.equals("Current Users")){
+                            String values = "";
+                            if (extra.getUserdata4().contains("users currently")) {
+                                values = extra.getUserdata4();
+                            } else if (extra.getUserdata5().contains("users currently")) {
+                                values = extra.getUserdata5();
+                            }
+                                                       
+                            
+                            if (!values.equals("")) {
+                                // e.g.USERS OK - 0 users currently logged in 
+                                String usersvalue = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" users"));
+                                
+                                extraDataList.add(new GetExtraDataListResponse(
+                                        extra.getEventId(),
+                                        extra.getUserdata1(),
+                                        extra.getUserdata2(),
+                                        extra.getUserdata3(),
+                                        extra.getUserdata4(),
+                                        extra.getUserdata5(),
+                                        extra.getUserdata6(),
+                                        extra.getUserdata7(),
+                                        extra.getUserdata8(),
+                                        extra.getUserdata9(),
+                                        extra.getDataPayload(),
+                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                        null,
+                                        null,
+                                        null,
+                                        usersvalue,
+                                        acideventResponse
+                                ));
+                            }
+                        }
                     } 
                 }
                 response.setExtraData(extraDataList);
