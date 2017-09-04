@@ -17,11 +17,11 @@ public class GetAcidEventsListResponse {
 
     private int deviceId;
 
-    private byte[] ctx;
+    //private byte[] ctx;
 
     private Date timestamp;
     
-    private String extra;
+    /*private String extra;
 
     private String ipSrc;
 
@@ -51,11 +51,11 @@ public class GetAcidEventsListResponse {
 
     private float tzone;
 
-    private Short ossimCorrelation;
+    private Short ossimCorrelation;*/
 
     private String srcHostname;
 
-    private String dstHostname;
+    /*private String dstHostname;
 
     private String srcMac;
 
@@ -64,14 +64,14 @@ public class GetAcidEventsListResponse {
     private String srcHost;
     private String dstHost;
     private String srcNet;
-    private String dstNet;
+    private String dstNet;*/
 
-    public GetAcidEventsListResponse(byte[] id, int deviceId, byte[] ctx, Date timestamp,String extra, String ipSrc,String ipDst, Integer ipProto, Short layer4Sport, Short layer4Dport, Short ossimPriority, Short ossimReliability, Short ossimAssetSrc, Short ossimAssetDst, Short ossimRiskC, Short ossimRiskA, Integer pluginId, Integer pluginSid, float tzone, Short ossimCorrelation, String srcHostname, String dstHostname, String srcMac, String dstMac, String srcHost, String dstHost, String srcNet, String dstNet) {
+    public GetAcidEventsListResponse(byte[] id, int deviceId, /*byte[] ctx,*/ Date timestamp/*,String extra, String ipSrc,String ipDst, Integer ipProto, Short layer4Sport, Short layer4Dport, Short ossimPriority, Short ossimReliability, Short ossimAssetSrc, Short ossimAssetDst, Short ossimRiskC, Short ossimRiskA, Integer pluginId, Integer pluginSid, float tzone, Short ossimCorrelation*/, String srcHostname/*, String dstHostname, String srcMac, String dstMac, String srcHost, String dstHost, String srcNet, String dstNet*/) {
         this.id = id;
         this.deviceId = deviceId;
-        this.ctx = ctx;
+        //this.ctx = ctx;
         this.timestamp = timestamp;
-        this.extra = extra;
+        /*this.extra = extra;
         this.ipSrc = ipSrc;
         this.ipDst = ipDst;
         this.ipProto = ipProto;
@@ -86,15 +86,15 @@ public class GetAcidEventsListResponse {
         this.pluginId = pluginId;
         this.pluginSid = pluginSid;
         this.tzone = tzone;
-        this.ossimCorrelation = ossimCorrelation;
+        this.ossimCorrelation = ossimCorrelation;*/
         this.srcHostname = srcHostname;
-        this.dstHostname = dstHostname;
+        /*this.dstHostname = dstHostname;
         this.srcMac = srcMac;
         this.dstMac = dstMac;
         this.srcHost = srcHost;
         this.dstHost = dstHost;
         this.srcNet = srcNet;
-        this.dstNet = dstNet;
+        this.dstNet = dstNet;*/
     }
 
     public byte[] getId() {
@@ -113,13 +113,13 @@ public class GetAcidEventsListResponse {
         this.deviceId = deviceId;
     }
 
-    public byte[] getCtx() {
+    /*public byte[] getCtx() {
         return ctx;
     }
 
     public void setCtx(byte[] ctx) {
         this.ctx = ctx;
-    }
+    }*/
 
     public Date getTimestamp() {
         return timestamp;
@@ -129,7 +129,7 @@ public class GetAcidEventsListResponse {
         this.timestamp = timestamp;
     }
 
-    
+    /*
     public String getExtra() {
         return extra;
     }
@@ -256,7 +256,7 @@ public class GetAcidEventsListResponse {
 
     public void setOssimCorrelation(Short ossimCorrelation) {
         this.ossimCorrelation = ossimCorrelation;
-    }
+    }*/
 
     public String getSrcHostname() {
         return srcHostname;
@@ -266,7 +266,7 @@ public class GetAcidEventsListResponse {
         this.srcHostname = srcHostname;
     }
 
-    public String getDstHostname() {
+   /* public String getDstHostname() {
         return dstHostname;
     }
 
@@ -320,5 +320,5 @@ public class GetAcidEventsListResponse {
 
     public void setDstNet(String dstNet) {
         this.dstNet = dstNet;
-    }
+    }*/
 }
