@@ -114,8 +114,8 @@ public class ServicesHandler {
                     acidEventsList.add(new GetAcidEventsListResponse(
                             acidev.getId(),
                             acidev.getDeviceId(),
-                            acidev.getCtx(),
-                            acidev.getTimestamp(),
+                            //acidev.getCtx(),
+                            acidev.getTimestamp()/*,
                             extra,
                             getIpfromBytes(acidev.getIpSrc()) ,
                             getIpfromBytes(acidev.getIpDst()),
@@ -131,15 +131,15 @@ public class ServicesHandler {
                             acidev.getPluginId(),
                             acidev.getPluginSid(),
                             acidev.getTzone(),
-                            acidev.getOssimCorrelation(),
-                            acidev.getSrcHostname(),
+                            acidev.getOssimCorrelation()*/,
+                            acidev.getSrcHostname()/*,
                             acidev.getDstHostname(),
                             getIpfromBytes(acidev.getSrcMac()),
                             getIpfromBytes(acidev.getDstMac()),
                             getIpfromBytes(acidev.getSrcHost()),
                             getIpfromBytes(acidev.getDstHost()),
                             getIpfromBytes(acidev.getSrcNet()),
-                            getIpfromBytes(acidev.getDstNet())));
+                            getIpfromBytes(acidev.getDstNet())*/));
                 }
                 response.setAcidEvents(acidEventsList);
                 return response;
@@ -198,7 +198,7 @@ public class ServicesHandler {
     /*
     * Gets extradata that associated Event happened after startDate
     */
-     public GetExtraDataResponse getExtraData(String userDataValue, long startDate, long endDate, String srcHost) {
+     public GetExtraDataResponse getExtraData(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
         //*********************** Variables ***************************
         GetExtraDataResponse response = new GetExtraDataResponse();
         List<ExtraData> extraDataparamsList;
@@ -218,6 +218,16 @@ public class ServicesHandler {
 
                 for (ExtraData extra : extraDataparamsList) {
                     
+                    boolean isWarnOrError = false;
+                    String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+                    if(severity)
+                    {
+                        if(currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("ERROR"))
+                        {
+                            isWarnOrError = true;
+                        }
+                    }
+                    
                     TypedQuery<AcidEvent> query1;
                     query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
                     query1.setParameter("eventId", extra.getEventId());                    
@@ -232,6 +242,8 @@ public class ServicesHandler {
                         checkHostName = srcHost;
                     }
                     
+                    if(!severity || (severity && isWarnOrError))
+                    {
                     if( relatedAcidEvent.getSrcHostname().equals(checkHostName) &&
                         relatedAcidEvent.getTimestamp().getTime() >= startDate &&
                         relatedAcidEvent.getTimestamp().getTime() <= endDate)
@@ -241,8 +253,8 @@ public class ServicesHandler {
                             GetAcidEventsListResponse(
                                 relatedAcidEvent.getId(),
                                 relatedAcidEvent.getDeviceId(),
-                                relatedAcidEvent.getCtx(),
-                                relatedAcidEvent.getTimestamp(),
+                                //relatedAcidEvent.getCtx(),
+                                relatedAcidEvent.getTimestamp()/*,
                                 null, // no extra needed here
                                 getIpfromBytes(relatedAcidEvent.getIpSrc()),
                                 getIpfromBytes(relatedAcidEvent.getIpDst()),
@@ -258,15 +270,15 @@ public class ServicesHandler {
                                 relatedAcidEvent.getPluginId(),
                                 relatedAcidEvent.getPluginSid(),
                                 relatedAcidEvent.getTzone(),
-                                relatedAcidEvent.getOssimCorrelation(),
-                                relatedAcidEvent.getSrcHostname(),
+                                relatedAcidEvent.getOssimCorrelation()*/,
+                                relatedAcidEvent.getSrcHostname()/*,
                                 relatedAcidEvent.getDstHostname(),
                                 getIpfromBytes(relatedAcidEvent.getSrcMac()),
                                 getIpfromBytes(relatedAcidEvent.getDstMac()),
                                 getIpfromBytes(relatedAcidEvent.getSrcHost()),
                                 getIpfromBytes(relatedAcidEvent.getDstHost()),
                                 getIpfromBytes(relatedAcidEvent.getSrcNet()),
-                                getIpfromBytes(relatedAcidEvent.getDstNet()));
+                                getIpfromBytes(relatedAcidEvent.getDstNet())*/);
 
 
                         if (userDataValue.equals("Server Load")) {
@@ -281,21 +293,13 @@ public class ServicesHandler {
                                 String loadvalue = values.substring(values.lastIndexOf("average: ") + 9);
                                 loadvalues = loadvalue.split(", ");
                                 extraDataList.add(new GetExtraDataListResponse(
-                                        extra.getEventId(),
-                                        extra.getUserdata1(),
-                                        extra.getUserdata2(),
-                                        extra.getUserdata3(),
-                                        extra.getUserdata4(),
-                                        extra.getUserdata5(),
-                                        extra.getUserdata6(),
-                                        extra.getUserdata7(),
-                                        extra.getUserdata8(),
-                                        extra.getUserdata9(),
+                                        extra.getEventId(),                                        
                                         extra.getDataPayload(),
                                         extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
                                         loadvalues[0],
                                         loadvalues[1],
                                         loadvalues[2].substring(0,loadvalues[2].indexOf("\n")),
+                                        null,
                                         null,
                                         acideventResponse
                                 ));
@@ -312,22 +316,14 @@ public class ServicesHandler {
                                 String loadvalue = values.substring(values.lastIndexOf(": ") + 2, values.lastIndexOf(" processes"));
                                 
                                 extraDataList.add(new GetExtraDataListResponse(
-                                        extra.getEventId(),
-                                        extra.getUserdata1(),
-                                        extra.getUserdata2(),
-                                        extra.getUserdata3(),
-                                        extra.getUserdata4(),
-                                        extra.getUserdata5(),
-                                        extra.getUserdata6(),
-                                        extra.getUserdata7(),
-                                        extra.getUserdata8(),
-                                        extra.getUserdata9(),
+                                        extra.getEventId(),                                        
                                         extra.getDataPayload(),
                                         extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
                                         null,
                                         null,
-                                        null,
+                                        null,                                        
                                         loadvalue,
+                                        null,
                                         acideventResponse
                                 ));
                             }
@@ -346,18 +342,10 @@ public class ServicesHandler {
                                 String usersvalue = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" users"));
                                 
                                 extraDataList.add(new GetExtraDataListResponse(
-                                        extra.getEventId(),
-                                        extra.getUserdata1(),
-                                        extra.getUserdata2(),
-                                        extra.getUserdata3(),
-                                        extra.getUserdata4(),
-                                        extra.getUserdata5(),
-                                        extra.getUserdata6(),
-                                        extra.getUserdata7(),
-                                        extra.getUserdata8(),
-                                        extra.getUserdata9(),
+                                        extra.getEventId(),                                       
                                         extra.getDataPayload(),
                                         extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                        null,
                                         null,
                                         null,
                                         null,
@@ -366,7 +354,8 @@ public class ServicesHandler {
                                 ));
                             }
                         }
-                    } 
+                    }
+                    }
                 }
                 response.setExtraData(extraDataList);
                 return response;

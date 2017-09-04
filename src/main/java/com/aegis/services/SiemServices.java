@@ -16,6 +16,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -95,7 +96,7 @@ public class SiemServices {
     @Path("/getCurrentLoad")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public GetExtraDataResponse getCurrentLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetExtraDataResponse getCurrentLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost, @QueryParam("severity") @DefaultValue("false") String severity) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetExtraDataResponse response;
@@ -104,7 +105,7 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Current Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost);
+        response = handler.getExtraData("Current Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
         return response;
     }
     
@@ -113,7 +114,7 @@ public class SiemServices {
     @Path("/getServerLoad")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public GetExtraDataResponse getServerLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetExtraDataResponse getServerLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost, @QueryParam("severity") @DefaultValue("false") String severity) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetExtraDataResponse response;
@@ -122,7 +123,7 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Server Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost);
+        response = handler.getExtraData("Server Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
         return response;
     }
     
@@ -130,7 +131,7 @@ public class SiemServices {
     @Path("/getCurrentProcesses")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public GetExtraDataResponse getCurrentProcesses(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetExtraDataResponse getCurrentProcesses(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost, @QueryParam("severity") @DefaultValue("false") String severity) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetExtraDataResponse response;
@@ -139,7 +140,7 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Total Processes",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost);
+        response = handler.getExtraData("Total Processes",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
         return response;
     }
     
@@ -147,7 +148,7 @@ public class SiemServices {
     @Path("/getCurrentUsers")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public GetExtraDataResponse getCurrentUsers(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetExtraDataResponse getCurrentUsers(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost, @QueryParam("severity") @DefaultValue("false") String severity) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetExtraDataResponse response;
@@ -156,7 +157,7 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Current Users",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost);
+        response = handler.getExtraData("Current Users",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
         return response;
     }
 }
