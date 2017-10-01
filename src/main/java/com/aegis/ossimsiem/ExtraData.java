@@ -91,6 +91,12 @@ public class ExtraData implements Serializable {
     @Lob
     @Column(name = "binary_data")
     private byte[] binaryData;
+    
+    /*    
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    private AcidEvent relatedEvent;   
+    */
 
     public ExtraData() {
     }

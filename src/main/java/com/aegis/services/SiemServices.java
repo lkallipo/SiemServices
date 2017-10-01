@@ -9,7 +9,10 @@ import com.aegis.controllers.ServicesHandler;
 import com.aegis.messages.GetAcidEventsResponse;
 import com.aegis.messages.GetDevicesResponse;
 import com.aegis.messages.GetEventsTimeframeResponse;
+import com.aegis.messages.GetExtraDataListResponse;
 import com.aegis.messages.GetExtraDataResponse;
+import com.aegis.messages.GetNetflowListResponse;
+import com.aegis.messages.GetNetflowResponse;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -144,7 +147,7 @@ public class SiemServices {
         return response;
     }
     
-        @GET
+    @GET
     @Path("/getCurrentUsers")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -158,6 +161,39 @@ public class SiemServices {
         }
         handler = new ServicesHandler(em);
         response = handler.getExtraData("Current Users",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        return response;
+    }
+    
+    @GET
+    @Path("/getClosestValueByTime")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetExtraDataListResponse getClosestValueByTime(@QueryParam("cipi") String cipi, @QueryParam("timestamp") String timestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetExtraDataListResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getClosestValueByTime(cipi,Long.parseLong(timestamp),srcHost);
+        return response;
+    }
+    
+    @GET
+    @Path("/getNetFlow")    
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetNetflowResponse getNetFlow(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetNetflowResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetFlow(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
         return response;
     }
 }

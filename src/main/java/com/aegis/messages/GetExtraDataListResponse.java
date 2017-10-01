@@ -45,7 +45,10 @@ public class GetExtraDataListResponse {
         this.currentUsers = currentUsers;
         this.relatedEvent = relatedEvent;
     }
-
+    
+    public GetExtraDataListResponse(){        
+    }
+            
     public byte[] getEventId() {
         return eventId;
     }

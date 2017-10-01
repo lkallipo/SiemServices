@@ -12,9 +12,14 @@ import com.aegis.messages.GetDevicesResponse;
 import com.aegis.messages.GetEventsTimeframeResponse;
 import com.aegis.messages.GetExtraDataListResponse;
 import com.aegis.messages.GetExtraDataResponse;
+import com.aegis.messages.GetNetflowListResponse;
+import com.aegis.messages.GetNetflowResponse;
 import com.aegis.ossimsiem.AcidEvent;
 import com.aegis.ossimsiem.Device;
 import com.aegis.ossimsiem.ExtraData;
+import com.opencsv.CSVReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -222,7 +227,7 @@ public class ServicesHandler {
                     String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
                     if(severity)
                     {
-                        if(currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("ERROR"))
+                        if(currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL"))
                         {
                             isWarnOrError = true;
                         }
@@ -370,6 +375,107 @@ public class ServicesHandler {
         return response;
     }//end getProjects
     
+     
+    /*
+    * Gets extradata that associated Event happened after startDate
+    */
+     public GetExtraDataListResponse getClosestValueByTime(String cipi, long timestamp, String srcHost) {
+        //*********************** Variables ***************************
+        GetExtraDataListResponse response = new GetExtraDataListResponse();
+        ExtraData extra = new ExtraData();
+
+        //*********************** Action ***************************
+        try {
+            java.util.Date time=new java.util.Date((long)timestamp);
+            TypedQuery<ExtraData> query1;
+                    query1 = (TypedQuery) em.createQuery("SELECT d FROM ExtraData d WHERE d.relatedEvent.timestamp = :timestamp");
+                    query1.setParameter("timestamp", time.toString());                    
+                    extra = query1.getSingleResult();
+         
+            
+                response= new GetExtraDataListResponse(
+                                        extra.getEventId(),                                       
+                                        extra.getDataPayload(),
+                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null);
+                return response;
+           
+
+        } catch (Exception e) {
+        }
+        return response;
+    }//end getProjects
+     
+    public GetNetflowResponse getNetFlow() {
+        //*********************** Variables ***************************
+        GetNetflowResponse response = new GetNetflowResponse();
+        
+        ArrayList<GetNetflowListResponse> netflowList;
+        netflowList = new ArrayList<GetNetflowListResponse>();
+        CSVReader reader = null;
+        String netflowCsv = "C:\\Users\\ispais\\Downloads\\flows-netDevice.csv";
+        
+        try{
+            reader = new CSVReader(new FileReader(netflowCsv));
+            String[] line = reader.readNext();
+            boolean finished = false;
+            while ((line=reader.readNext()) != null && !finished){
+                if(!line[0].equals("Summary"))
+                {
+               //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
+                netflowList.add(new GetNetflowListResponse(
+                        line[0],
+                        line[1],
+                        Float.parseFloat(line[2]),
+                        line[3],
+                        Integer.parseInt(line[5]),
+                        line[4],
+                        Integer.parseInt(line[6]),
+                        line[7],
+                        Integer.parseInt(line[11]),
+                        Integer.parseInt(line[13])));
+                }
+                else{
+                    finished = true;
+                }
+            }
+            
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        
+        response.setNetflowList(netflowList);
+        
+        
+        //*********************** Action ***************************
+//        try {
+//            
+//            if (!devicesparamsList.isEmpty()) {
+//                devicesList = new ArrayList<GetDevicesListResponse>();
+//                for (Device dev : devicesparamsList) {
+//                    devicesList.add(new GetDevicesListResponse(dev.getId(), 
+//                            getIpfromBytes(dev.getDeviceIp()), 
+//                            dev.getInterface1(), 
+//                            getIpfromBytes(dev.getSensorId())));
+//                }
+//                response.setDevices(devicesList);
+//                return response;
+//            } else {
+//                devicesList = new ArrayList<GetDevicesListResponse>();
+//                response.setDevices(devicesList);
+//                return response;
+//            }
+//
+//        } catch (Exception e) {
+//        }
+        return response;
+    }//end getDevices
+     
     private static String getIpfromBytes(byte[] byteip){
      if ( byteip != null &&  byteip.length > 1) {
          try {
