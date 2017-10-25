@@ -43,8 +43,16 @@ public class GetNetflowListResponse {
     //opkt
     private int outgoingPackets;
     
+    //ipkt
+    private int incomingBytes;
+    
+    //opkt
+    private int outgoingBytes;
 
-    public GetNetflowListResponse(String timestart, String timeend, float duration, String srcAddress, int srcPort, String dstAddress, int dstPort, String protocol, int incomingPackets, int outgoingPackets) {
+    public GetNetflowListResponse(String timestart, String timeend, float duration, 
+            String srcAddress, int srcPort, String dstAddress, int dstPort, 
+            String protocol, int incomingPackets, int outgoingPackets, 
+            int incomingBytes, int outgoingBytess) {
         this.timestart = timestart;
         this.timeend = timeend;
         this.duration = duration;
@@ -55,6 +63,8 @@ public class GetNetflowListResponse {
         this.protocol = protocol;
         this.incomingPackets = incomingPackets;
         this.outgoingPackets = outgoingPackets;
+        this.incomingBytes = incomingBytes;
+        this.outgoingBytes = outgoingBytes;
     }
 
     public String getTimestart() {
@@ -136,5 +146,22 @@ public class GetNetflowListResponse {
     public void setOutgoingPackets(int outgoingPackets) {
         this.outgoingPackets = outgoingPackets;
     }
+
+    public int getIncomingBytes() {
+        return incomingBytes;
+    }
+
+    public void setIncomingBytes(int incomingBytes) {
+        this.incomingBytes = incomingBytes;
+    }
+
+    public int getOutgoingBytes() {
+        return outgoingBytes;
+    }
+
+    public void setOutgoingBytes(int outgoingBytes) {
+        this.outgoingBytes = outgoingBytes;
+    }
+    
     
 }
