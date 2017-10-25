@@ -13,6 +13,7 @@ import com.aegis.messages.GetExtraDataListResponse;
 import com.aegis.messages.GetExtraDataResponse;
 import com.aegis.messages.GetNetflowListResponse;
 import com.aegis.messages.GetNetflowResponse;
+import com.aegis.messages.GetNetworkLoadResponse;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -194,6 +195,22 @@ public class SiemServices {
         }
         handler = new ServicesHandler(em);
         response = handler.getNetFlow(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
+        return response;
+    }
+    
+    @GET
+    @Path("/getNetworkLoad")    
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetNetworkLoadResponse getNetWorkLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetNetworkLoadResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetworkLoad(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
         return response;
     }
 }

@@ -14,6 +14,8 @@ import com.aegis.messages.GetExtraDataListResponse;
 import com.aegis.messages.GetExtraDataResponse;
 import com.aegis.messages.GetNetflowListResponse;
 import com.aegis.messages.GetNetflowResponse;
+import com.aegis.messages.GetNetworkLoadListResponse;
+import com.aegis.messages.GetNetworkLoadResponse;
 import com.aegis.ossimsiem.AcidEvent;
 import com.aegis.ossimsiem.Device;
 import com.aegis.ossimsiem.ExtraData;
@@ -24,7 +26,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -412,13 +418,11 @@ public class ServicesHandler {
     }//end getProjects
      
     public GetNetflowResponse getNetFlow() {
-        //*********************** Variables ***************************
-        GetNetflowResponse response = new GetNetflowResponse();
-        
-        ArrayList<GetNetflowListResponse> netflowList;
-        netflowList = new ArrayList<GetNetflowListResponse>();
+
+        GetNetflowResponse response = new GetNetflowResponse();        
+        ArrayList<GetNetflowListResponse> netflowList = new ArrayList<GetNetflowListResponse>();
         CSVReader reader = null;
-        String netflowCsv = "C:\\Users\\ispais\\Downloads\\flows-netDevice.csv";
+        String netflowCsv = "C:\\Users\\lkallipolitis\\Documents\\mine\\cipsec\\flowsAllFixed.csv";
         
         try{
             reader = new CSVReader(new FileReader(netflowCsv));
@@ -429,52 +433,87 @@ public class ServicesHandler {
                 {
                //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
                 netflowList.add(new GetNetflowListResponse(
-                        line[0],
                         line[1],
-                        Float.parseFloat(line[2]),
                         line[3],
-                        Integer.parseInt(line[5]),
-                        line[4],
-                        Integer.parseInt(line[6]),
-                        line[7],
-                        Integer.parseInt(line[11]),
-                        Integer.parseInt(line[13])));
+                        Float.parseFloat(line[4]),
+                        line[5],
+                        Integer.parseInt(line[7]),
+                        line[6],
+                        Integer.parseInt(line[8]),
+                        line[9],
+                        Integer.parseInt(line[13]),
+                        Integer.parseInt(line[15]),
+                        Integer.parseInt(line[14]),
+                        Integer.parseInt(line[16])));
                 }
                 else{
                     finished = true;
                 }
-            }
-            
+            }            
         }catch(IOException e){
             e.printStackTrace();
         }
         
         response.setNetflowList(netflowList);
         
-        
-        //*********************** Action ***************************
-//        try {
-//            
-//            if (!devicesparamsList.isEmpty()) {
-//                devicesList = new ArrayList<GetDevicesListResponse>();
-//                for (Device dev : devicesparamsList) {
-//                    devicesList.add(new GetDevicesListResponse(dev.getId(), 
-//                            getIpfromBytes(dev.getDeviceIp()), 
-//                            dev.getInterface1(), 
-//                            getIpfromBytes(dev.getSensorId())));
-//                }
-//                response.setDevices(devicesList);
-//                return response;
-//            } else {
-//                devicesList = new ArrayList<GetDevicesListResponse>();
-//                response.setDevices(devicesList);
-//                return response;
-//            }
-//
-//        } catch (Exception e) {
-//        }
         return response;
-    }//end getDevices
+    }//end getNetFlow
+    
+     public GetNetworkLoadResponse getNetworkLoad() {
+
+        GetNetworkLoadResponse response = new GetNetworkLoadResponse();        
+        ArrayList <GetNetworkLoadListResponse> networkloadList = new ArrayList<GetNetworkLoadListResponse>();
+        CSVReader reader = null;
+        String netflowCsv = "C:\\Users\\lkallipolitis\\Documents\\mine\\cipsec\\flowsAllFixed.csv";
+        
+        try{
+            reader = new CSVReader(new FileReader(netflowCsv));
+            String[] line = reader.readNext();
+            boolean finished = false;
+            
+            Map <String,Double> netvals = new LinkedHashMap<String,Double>();
+            while ((line=reader.readNext()) != null && !finished){
+                if(!line[0].equals("Summary"))
+                {
+                    
+                    Float duration = Float.parseFloat(line[4]);
+                    Float inbytes = Float.parseFloat(line[14]);
+                    
+                    double bps = duration > 0 ? inbytes/duration : 0.01;
+                    netvals.put(line[3], bps);
+                    
+                    if(netvals.containsKey(line[3]))
+                    {
+                        netvals.put(line[3], (netvals.get(line[3]) + bps) /2);
+                    }
+                    else
+                    {
+                        netvals.put(line[3],bps);
+                    }    
+                }
+                else{
+                    finished = true;
+                }
+            }
+            
+            Iterator it = netvals.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                networkloadList.add(new GetNetworkLoadListResponse(                       
+                        pair.getKey().toString(),                        
+                        (double)pair.getValue()));
+            }
+            
+            //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
+                
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        
+        response.setNetworkLoad(networkloadList);
+        
+        return response;
+    }//end getNetworkLoad
      
     private static String getIpfromBytes(byte[] byteip){
      if ( byteip != null &&  byteip.length > 1) {
