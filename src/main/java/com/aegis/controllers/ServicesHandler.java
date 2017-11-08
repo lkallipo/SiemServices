@@ -126,8 +126,8 @@ public class ServicesHandler {
                             acidev.getId(),
                             acidev.getDeviceId(),
                             //acidev.getCtx(),
-                            acidev.getTimestamp()/*,
-                            extra,
+                            acidev.getTimestamp(),
+                            /*extra,/*
                             getIpfromBytes(acidev.getIpSrc()) ,
                             getIpfromBytes(acidev.getIpDst()),
                             acidev.getIpProto(),
@@ -142,7 +142,7 @@ public class ServicesHandler {
                             acidev.getPluginId(),
                             acidev.getPluginSid(),
                             acidev.getTzone(),
-                            acidev.getOssimCorrelation()*/,
+                            acidev.getOssimCorrelation(),*/
                             acidev.getSrcHostname()/*,
                             acidev.getDstHostname(),
                             getIpfromBytes(acidev.getSrcMac()),
@@ -309,7 +309,7 @@ public class ServicesHandler {
                                         extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
                                         loadvalues[0],
                                         loadvalues[1],
-                                        loadvalues[2].substring(0,loadvalues[2].indexOf("\n")),
+                                        loadvalues[2].trim(),
                                         null,
                                         null,
                                         acideventResponse
@@ -345,14 +345,15 @@ public class ServicesHandler {
                                 values = extra.getUserdata4();
                             } else if (extra.getUserdata5().contains("users currently")) {
                                 values = extra.getUserdata5();
-                            }
-                                                       
+                            }                                                       
                             
                             if (!values.equals("")) {
                                 // e.g.USERS OK - 0 users currently logged in 
-                                String usersvalue = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" users"));
+                                if(values.indexOf("- ")!= -1 && values.indexOf(" users") != -1 
+                                        && extra.getUserdata1().indexOf(" ")!= -1){
+                                    String usersvalue = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" users"));
                                 
-                                extraDataList.add(new GetExtraDataListResponse(
+                                    extraDataList.add(new GetExtraDataListResponse(
                                         extra.getEventId(),                                       
                                         extra.getDataPayload(),
                                         extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
@@ -362,7 +363,8 @@ public class ServicesHandler {
                                         null,
                                         usersvalue,
                                         acideventResponse
-                                ));
+                                    ));                                    
+                                }
                             }
                         }
                     }
