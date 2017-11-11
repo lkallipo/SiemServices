@@ -13,6 +13,7 @@ import com.aegis.messages.GetExtraDataListResponse;
 import com.aegis.messages.GetExtraDataResponse;
 import com.aegis.messages.GetNetflowListResponse;
 import com.aegis.messages.GetNetflowResponse;
+import com.aegis.messages.GetNetworkConnsResponse;
 import com.aegis.messages.GetNetworkLoadResponse;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -166,6 +167,24 @@ public class SiemServices {
     }
     
     @GET
+    @Path("/getHttpStatus")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetExtraDataResponse getHttpStatus(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost, @QueryParam("severity") @DefaultValue("false") String severity) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetExtraDataResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getExtraData("HTTP",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        return response;
+    }
+    
+    
+    @GET
     @Path("/getClosestValueByTime")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -211,6 +230,22 @@ public class SiemServices {
         }
         handler = new ServicesHandler(em);
         response = handler.getNetworkLoad(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
+        return response;
+    }
+    
+        @GET
+    @Path("/getNetworkConnections")    
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetNetworkConnsResponse getNetworkConnections(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetNetworkConnsResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetworkConnections(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
         return response;
     }
 }

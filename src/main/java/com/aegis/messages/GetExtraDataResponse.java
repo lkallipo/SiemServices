@@ -11,14 +11,13 @@ import java.util.List;
  */
 public class GetExtraDataResponse {
     
-    List<GetExtraDataListResponse> extraData;
+    List<?> extraData;
 
-    public List<GetExtraDataListResponse> getExtraData() {
+    public List<?> getExtraData() {
         return extraData;
     }
 
-    public void setExtraData(List<GetExtraDataListResponse> extraData) {
+    public void setExtraData(List<?> extraData) {
         this.extraData = extraData;
-    }
-    
+    }    
 }

@@ -12,8 +12,11 @@ import com.aegis.messages.GetDevicesResponse;
 import com.aegis.messages.GetEventsTimeframeResponse;
 import com.aegis.messages.GetExtraDataListResponse;
 import com.aegis.messages.GetExtraDataResponse;
+import com.aegis.messages.GetHttpStatusResponse;
 import com.aegis.messages.GetNetflowListResponse;
 import com.aegis.messages.GetNetflowResponse;
+import com.aegis.messages.GetNetworkConnsListResponse;
+import com.aegis.messages.GetNetworkConnsResponse;
 import com.aegis.messages.GetNetworkLoadListResponse;
 import com.aegis.messages.GetNetworkLoadResponse;
 import com.aegis.ossimsiem.AcidEvent;
@@ -24,6 +27,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -214,6 +219,7 @@ public class ServicesHandler {
         GetExtraDataResponse response = new GetExtraDataResponse();
         List<ExtraData> extraDataparamsList;
         ArrayList<GetExtraDataListResponse> extraDataList;
+        ArrayList<GetHttpStatusResponse> httpResponseList = new ArrayList<GetHttpStatusResponse>();
         TypedQuery query;
 
         //*********************** Action ***************************
@@ -255,42 +261,17 @@ public class ServicesHandler {
                     
                     if(!severity || (severity && isWarnOrError))
                     {
-                    if( relatedAcidEvent.getSrcHostname().equals(checkHostName) &&
+                        if( relatedAcidEvent.getSrcHostname().equals(checkHostName) &&
                         relatedAcidEvent.getTimestamp().getTime() >= startDate &&
                         relatedAcidEvent.getTimestamp().getTime() <= endDate)
-                    {  
+                        {  
                         
                         GetAcidEventsListResponse acideventResponse = new 
                             GetAcidEventsListResponse(
                                 relatedAcidEvent.getId(),
                                 relatedAcidEvent.getDeviceId(),
-                                //relatedAcidEvent.getCtx(),
-                                relatedAcidEvent.getTimestamp()/*,
-                                null, // no extra needed here
-                                getIpfromBytes(relatedAcidEvent.getIpSrc()),
-                                getIpfromBytes(relatedAcidEvent.getIpDst()),
-                                relatedAcidEvent.getIpProto(),
-                                relatedAcidEvent.getLayer4Sport(),
-                                relatedAcidEvent.getLayer4Dport(),
-                                relatedAcidEvent.getOssimPriority(),
-                                relatedAcidEvent.getOssimReliability(),
-                                relatedAcidEvent.getOssimAssetSrc(),
-                                relatedAcidEvent.getOssimAssetDst(),
-                                relatedAcidEvent.getOssimRiskC(),
-                                relatedAcidEvent.getOssimRiskA(),
-                                relatedAcidEvent.getPluginId(),
-                                relatedAcidEvent.getPluginSid(),
-                                relatedAcidEvent.getTzone(),
-                                relatedAcidEvent.getOssimCorrelation()*/,
-                                relatedAcidEvent.getSrcHostname()/*,
-                                relatedAcidEvent.getDstHostname(),
-                                getIpfromBytes(relatedAcidEvent.getSrcMac()),
-                                getIpfromBytes(relatedAcidEvent.getDstMac()),
-                                getIpfromBytes(relatedAcidEvent.getSrcHost()),
-                                getIpfromBytes(relatedAcidEvent.getDstHost()),
-                                getIpfromBytes(relatedAcidEvent.getSrcNet()),
-                                getIpfromBytes(relatedAcidEvent.getDstNet())*/);
-
+                                relatedAcidEvent.getTimestamp(),                                
+                                relatedAcidEvent.getSrcHostname());
 
                         if (userDataValue.equals("Server Load")) {
                             String[] loadvalues = new String[3];
@@ -315,6 +296,7 @@ public class ServicesHandler {
                                         acideventResponse
                                 ));
                             }
+                            response.setExtraData(extraDataList);
                         }
                         else if(userDataValue.equals("Total Processes")){
                             String values = "";
@@ -338,6 +320,7 @@ public class ServicesHandler {
                                         acideventResponse
                                 ));
                             }
+                            response.setExtraData(extraDataList);
                         }
                         else if(userDataValue.equals("Current Users")){
                             String values = "";
@@ -349,8 +332,8 @@ public class ServicesHandler {
                             
                             if (!values.equals("")) {
                                 // e.g.USERS OK - 0 users currently logged in 
-                                if(values.indexOf("- ")!= -1 && values.indexOf(" users") != -1 
-                                        && extra.getUserdata1().indexOf(" ")!= -1){
+                                if(values.contains("- ") && values.contains(" users") 
+                                        && extra.getUserdata1().contains(" ")){
                                     String usersvalue = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" users"));
                                 
                                     extraDataList.add(new GetExtraDataListResponse(
@@ -366,11 +349,54 @@ public class ServicesHandler {
                                     ));                                    
                                 }
                             }
+                            response.setExtraData(extraDataList);
+                        }
+                        else if(userDataValue.equals("HTTP")){
+                            
+                            String values = "";
+                            /* Userdata 4 gets populated when 3xx http response */
+                            if (extra.getUserdata4().contains("HTTP OK")) {
+                                values = extra.getUserdata4();                                
+                                /* Userdata  gets populated when 2xx http response */
+                            } else if (extra.getUserdata5().contains("HTTP OK")) {
+                                values = extra.getUserdata5();
+                            } else{
+                                values="0";
+                            }                                                      
+                            
+                            if (!values.equals("")) {
+                                // e.g.USERS OK - 0 users currently logged in 
+                                if(values.contains("- ") && values.contains("in ") 
+                                        && values.contains(" bytes") && values.contains(" second")){
+                                    String bytes = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" bytes"));
+                                    String seconds = values.substring(values.lastIndexOf("in ") + 2, values.lastIndexOf(" second")); 
+                                    
+                                    double throuput = Double.parseDouble(bytes)/ Double.parseDouble(seconds) / 1000;
+                                    
+                                    httpResponseList.add(new GetHttpStatusResponse(
+                                        extra.getEventId(),                                       
+                                        extra.getDataPayload(),
+                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                        String.format ("%.2f", throuput),
+                                        acideventResponse
+                                    ));                                    
+                                }
+                                else if(values.equals("0")){
+                                    httpResponseList.add(new GetHttpStatusResponse(
+                                        extra.getEventId(),                                       
+                                        extra.getDataPayload(),
+                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                        "0",
+                                        acideventResponse
+                                    )); 
+                                }
+                            }
+                            response.setExtraData(httpResponseList);
+                        }
                         }
                     }
-                    }
                 }
-                response.setExtraData(extraDataList);
+                
                 return response;
             } else {
                 extraDataList = new ArrayList<GetExtraDataListResponse>();
@@ -462,11 +488,12 @@ public class ServicesHandler {
     }//end getNetFlow
     
      public GetNetworkLoadResponse getNetworkLoad() {
+        //ts,ts,te,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
 
         GetNetworkLoadResponse response = new GetNetworkLoadResponse();        
         ArrayList <GetNetworkLoadListResponse> networkloadList = new ArrayList<GetNetworkLoadListResponse>();
         CSVReader reader = null;
-        String netflowCsv = "C:\\Users\\lkallipolitis\\Documents\\mine\\cipsec\\flowsAllFixed.csv";
+        String netflowCsv = "C:\\Users\\ispais\\Documents\\cipsec\\flowsAllFixed.csv";
         
         try{
             reader = new CSVReader(new FileReader(netflowCsv));
@@ -497,16 +524,13 @@ public class ServicesHandler {
                     finished = true;
                 }
             }
+            //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
             
-            Iterator it = netvals.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry) it.next();
-                networkloadList.add(new GetNetworkLoadListResponse(                       
+            for (Map.Entry pair : netvals.entrySet()) {
+                networkloadList.add(new GetNetworkLoadListResponse(
                         pair.getKey().toString(),                        
                         (double)pair.getValue()));
             }
-            
-            //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
                 
         }catch(IOException e){
             e.printStackTrace();
@@ -516,6 +540,57 @@ public class ServicesHandler {
         
         return response;
     }//end getNetworkLoad
+     
+    public GetNetworkConnsResponse getNetworkConnections() {
+        //ts,ts,te,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
+
+        GetNetworkConnsResponse response = new GetNetworkConnsResponse();        
+        ArrayList <GetNetworkConnsListResponse> networkconnsList = new ArrayList<GetNetworkConnsListResponse>();
+        CSVReader reader = null;
+        String netflowCsv = "C:\\Users\\ispais\\Documents\\cipsec\\flowsAllFixed.csv";
+        
+        try{
+            reader = new CSVReader(new FileReader(netflowCsv));
+            String[] line = reader.readNext();
+            boolean finished = false;            
+            Map <String,Integer> netvals = new LinkedHashMap<String,Integer>();
+            
+            while ((line=reader.readNext()) != null && !finished){
+                if(!line[0].equals("Summary"))
+                {
+                    //Read flow's start datetime e.g. 2017-06-26 6:17:17
+                   String date = line[1].substring(0,line[1].indexOf(":")+3);
+                   
+                   if(netvals.containsKey(date))
+                    {
+                        netvals.put(date, netvals.get(date) + 1);
+                    }
+                    else
+                    {
+                        netvals.put(date,1);
+                    } 
+                }
+                else{
+                    finished = true;
+                }
+            }
+            //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
+            
+            for (Map.Entry pair : netvals.entrySet()) {
+                networkconnsList.add(new GetNetworkConnsListResponse(
+                        pair.getKey().toString(),                        
+                        (int)pair.getValue()));
+            }
+                
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        
+        response.setNetworkConnections(networkconnsList);
+        
+        return response;
+    }//end getNetworkConnections
+     
      
     private static String getIpfromBytes(byte[] byteip){
      if ( byteip != null &&  byteip.length > 1) {
