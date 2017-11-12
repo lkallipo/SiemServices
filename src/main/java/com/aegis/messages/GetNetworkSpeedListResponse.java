@@ -9,15 +9,15 @@ package com.aegis.messages;
  *
  * @author lkallipolitis
  */
-public class GetNetworkLoadListResponse {
+public class GetNetworkSpeedListResponse {
     
     private String time;    
 
-    private double packetsPerSec;
+    private double bytesPerSec;
 
-    public GetNetworkLoadListResponse(String time, double packetsPerSec) {
+    public GetNetworkSpeedListResponse(String time, double bytesPerSec) {
         this.time = time;
-        this.packetsPerSec = packetsPerSec;
+        this.bytesPerSec = bytesPerSec;
     }
 
     public String getTime() {
@@ -28,11 +28,11 @@ public class GetNetworkLoadListResponse {
         this.time = time;
     }
 
-    public double getPacketsPerSec() {
-        return packetsPerSec;
+    public double getBytesPerSec() {
+        return bytesPerSec;
     }
 
-    public void setPacketsPerSec(double packetsPerSec) {
-        this.packetsPerSec = packetsPerSec;
-    }       
+    public void setBytesPerSec(double bytesPerSec) {
+        this.bytesPerSec = bytesPerSec;
+    }     
 }

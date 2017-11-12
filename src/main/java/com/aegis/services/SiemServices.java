@@ -15,6 +15,7 @@ import com.aegis.messages.GetNetflowListResponse;
 import com.aegis.messages.GetNetflowResponse;
 import com.aegis.messages.GetNetworkConnsResponse;
 import com.aegis.messages.GetNetworkLoadResponse;
+import com.aegis.messages.GetNetworkSpeedResponse;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -233,7 +234,7 @@ public class SiemServices {
         return response;
     }
     
-        @GET
+    @GET
     @Path("/getNetworkConnections")    
     @Produces(MediaType.APPLICATION_JSON)
     public GetNetworkConnsResponse getNetworkConnections(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
@@ -246,6 +247,22 @@ public class SiemServices {
         }
         handler = new ServicesHandler(em);
         response = handler.getNetworkConnections(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
+        return response;
+    }
+    
+    @GET
+    @Path("/getNetworkSpeed")    
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetNetworkSpeedResponse getNetworkSpeed(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetNetworkSpeedResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetworkSpeed(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
         return response;
     }
 }
