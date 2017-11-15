@@ -27,6 +27,7 @@ import com.aegis.ossimsiem.ExtraData;
 import com.opencsv.CSVReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -48,10 +50,20 @@ import javax.persistence.TypedQuery;
 public class ServicesHandler {
 
     private final EntityManager em;
-
+    private Properties props;
+    
     public ServicesHandler(EntityManager em) {
         this.em = em;
-    }
+        String resourceName = "config.properties"; // could also be a constant
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        props = new Properties();
+        InputStream resourceStream = loader.getResourceAsStream(resourceName);
+        try{
+            props.load(resourceStream);
+        } catch (IOException ex) {
+            Logger.getLogger(ServicesHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }  
 
     public GetDevicesResponse getDevices() {
         //*********************** Variables ***************************
@@ -183,12 +195,9 @@ public class ServicesHandler {
         TypedQuery query;
       
         try {
-            //query =  em.createNamedQuery(AcidEvent.findAll); //createQuery("SELECT d FROM Device d ");
-            //we use list to avoid "not found" exception
             extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
+            //extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.userdata1 LIKE :userdata1").setParameter("userdata1", "%" + userDataValue +"%").getResultList();
 
-            //if we found no results, the users has no track with this trackId
-            //so return error message
             if (!extraDataparamsList.isEmpty()) {
                 extraDataList = new ArrayList<>();
 
@@ -196,6 +205,17 @@ public class ServicesHandler {
 
                     boolean isWarnOrError = false;
                     String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+                    
+                    /* XL-SIEM adaptation*/
+                    /*int severitypos=0;
+                    if(userDataValue.equals("Current Load")){
+                        severitypos = extra.getUserdata1().indexOf("Current Load;")+13;
+                    }
+                    else if (userDataValue.equals("Total Processes")){
+                        severitypos = extra.getUserdata1().indexOf("Total Processes;")+16;
+                    }
+                    String currentEventSeverity = extra.getUserdata1().substring(severitypos,extra.getUserdata1().indexOf(";", severitypos));
+*/
                     if (severity) {
                         if (currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL")) {
                             isWarnOrError = true;
@@ -226,6 +246,7 @@ public class ServicesHandler {
                                     relatedAcidEvent.getSrcHostname());
 
                             if (userDataValue.equals("Server Load")) {
+                            //if (userDataValue.equals("Current Load")) {
                                 String[] loadvalues = new String[3];
                                 String values = "";
                                 if (extra.getUserdata5().contains("average")) {
@@ -233,13 +254,20 @@ public class ServicesHandler {
                                 } else if (extra.getUserdata4().contains("average")) {
                                     values = extra.getUserdata4();
                                 }
+                                // XL-SIEM database
+                                else if (extra.getUserdata1().contains("average")) {
+                                    values = extra.getUserdata1();
+                                }
+                                
+                                
                                 if (!values.equals("")) {
                                     String loadvalue = values.substring(values.lastIndexOf("average: ") + 9);
                                     loadvalues = loadvalue.split(", ");
                                     extraDataList.add(new GetExtraDataListResponse(
                                             extra.getEventId(),
                                             extra.getDataPayload(),
-                                            extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                            //extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                            currentEventSeverity,
                                             loadvalues[0],
                                             loadvalues[1],
                                             loadvalues[2].trim(),
@@ -256,13 +284,18 @@ public class ServicesHandler {
                                 } else if (extra.getUserdata5().contains("processes")) {
                                     values = extra.getUserdata5();
                                 }
+                                // XL-SIEM database
+                                else if (extra.getUserdata1().contains("processes")) {
+                                    values = extra.getUserdata1();
+                                }
+                                
                                 if (!values.equals("")) {
                                     String loadvalue = values.substring(values.lastIndexOf(": ") + 2, values.lastIndexOf(" processes"));
 
                                     extraDataList.add(new GetExtraDataListResponse(
                                             extra.getEventId(),
                                             extra.getDataPayload(),
-                                            extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                            currentEventSeverity,                                            
                                             null,
                                             null,
                                             null,
@@ -346,7 +379,7 @@ public class ServicesHandler {
                 }
                 return response;
             } else {
-                extraDataList = new ArrayList<GetExtraDataListResponse>();
+                extraDataList = new ArrayList<>();
                 response.setExtraData(extraDataList);
                 return response;
             }
@@ -392,7 +425,7 @@ public class ServicesHandler {
         GetNetflowResponse response = new GetNetflowResponse();        
         ArrayList<GetNetflowListResponse> netflowList = new ArrayList<GetNetflowListResponse>();
         CSVReader reader = null;
-        String netflowCsv = "C:\\Users\\lkallipolitis\\Documents\\mine\\cipsec\\flowsAllFixed.csv";
+        String netflowCsv = props.getProperty("netflowcsv");
         
         try{
             reader = new CSVReader(new FileReader(netflowCsv));
@@ -432,7 +465,7 @@ public class ServicesHandler {
         GetNetworkLoadResponse response = new GetNetworkLoadResponse();        
         ArrayList <GetNetworkLoadListResponse> networkloadList = new ArrayList<GetNetworkLoadListResponse>();
         CSVReader reader = null;
-        String netflowCsv = "C:\\Users\\ispais\\Documents\\cipsec\\flowsAllFixed.csv";
+        String netflowCsv = props.getProperty("netflowcsv");
         
         try{
             reader = new CSVReader(new FileReader(netflowCsv));
@@ -480,7 +513,7 @@ public class ServicesHandler {
         GetNetworkConnsResponse response = new GetNetworkConnsResponse();        
         ArrayList <GetNetworkConnsListResponse> networkconnsList = new ArrayList<>();
         CSVReader reader = null;
-        String netflowCsv = "C:\\Users\\ispais\\Documents\\cipsec\\flowsAllFixed.csv";
+        String netflowCsv = props.getProperty("netflowcsv");
         
         try{
             reader = new CSVReader(new FileReader(netflowCsv));
@@ -524,7 +557,7 @@ public class ServicesHandler {
         GetNetworkSpeedResponse response = new GetNetworkSpeedResponse();        
         ArrayList <GetNetworkSpeedListResponse> networkspeedList = new ArrayList<>();
         CSVReader reader = null;
-        String netflowCsv = "C:\\Users\\ispais\\Documents\\cipsec\\flowsAllFixed.csv";
+        String netflowCsv = props.getProperty("netflowcsv");
         
         try{
             reader = new CSVReader(new FileReader(netflowCsv));
