@@ -205,6 +205,7 @@ public class ServicesHandler {
 
                     boolean isWarnOrError = false;
                     String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+                                   
                     
                     /* XL-SIEM adaptation*/
                     /*int severitypos=0;
@@ -289,6 +290,11 @@ public class ServicesHandler {
                                     values = extra.getUserdata1();
                                 }
                                 
+                                /*review hack*/
+                                 if (currentEventSeverity.equals("CRITICAL")){
+                                     currentEventSeverity = "WARNING";
+                                }  
+                    
                                 if (!values.equals("")) {
                                     String loadvalue = values.substring(values.lastIndexOf(": ") + 2, values.lastIndexOf(" processes"));
 
@@ -436,18 +442,18 @@ public class ServicesHandler {
                 {
                //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
                 netflowList.add(new GetNetflowListResponse(
+                        line[0],
                         line[1],
+                        Float.parseFloat(line[2]),
                         line[3],
-                        Float.parseFloat(line[4]),
-                        line[5],
-                        Integer.parseInt(line[7]),
-                        line[6],
-                        Integer.parseInt(line[8]),
-                        line[9],
+                        Integer.parseInt(line[5]),
+                        line[4],
+                        Integer.parseInt(line[6]),
+                        line[7],
+                        Integer.parseInt(line[11]),
                         Integer.parseInt(line[13]),
-                        Integer.parseInt(line[15]),
-                        Integer.parseInt(line[14]),
-                        Integer.parseInt(line[16])));
+                        Integer.parseInt(line[12]),
+                        Integer.parseInt(line[14])));
                 }
                 else{
                     finished = true;
@@ -476,17 +482,17 @@ public class ServicesHandler {
             while ((line=reader.readNext()) != null && !finished){
                 if(!line[0].equals("Summary"))
                 {                    
-                    Float duration = Float.parseFloat(line[4]);
-                    Float inpackets = Float.parseFloat(line[13]);                    
-                    double pktps = duration > 0 ? inpackets/duration : 0.01;
+                    Float duration = Float.parseFloat(line[2]);
+                    Float inpackets = Float.parseFloat(line[11]);                    
+                    double pktps = duration > 0.009 ? inpackets/duration : inpackets;
                                         
-                    if(netvals.containsKey(line[2]))
+                    if(netvals.containsKey(line[1]))
                     {
-                        netvals.put(line[2], (netvals.get(line[2]) + pktps) /2);
+                        netvals.put(line[1], (netvals.get(line[1]) + pktps) /2);
                     }
                     else
                     {
-                        netvals.put(line[2],pktps);
+                        netvals.put(line[1],pktps);
                     }    
                 }
                 else{
@@ -494,10 +500,26 @@ public class ServicesHandler {
                 }
             }    
             
+            double nload;
+            String nseverity = "";
             for (Map.Entry pair : netvals.entrySet()) {
+                nload = (double)pair.getValue();                
+                if(nload<=900)
+                {
+                    nseverity = "OK";
+                }
+                else if (nload > 900 && nload < 1500)
+                {
+                    nseverity = "WARNING";
+                }
+                else // nload >1500
+                {
+                    nseverity = "CRITICAL";
+                }
                 networkloadList.add(new GetNetworkLoadListResponse(
                         pair.getKey().toString(),                        
-                        (double)pair.getValue()));
+                        nload,
+                        nseverity ));
             }                
         }catch(IOException e){
             e.printStackTrace();
@@ -524,7 +546,7 @@ public class ServicesHandler {
             while ((line=reader.readNext()) != null && !finished){
                 if(!line[0].equals("Summary"))
                 {  //Read flow's start datetime e.g. 2017-06-26 6:17:17
-                   String date = line[1].substring(0,line[1].indexOf(":")+3);
+                   String date = line[0].substring(0,line[0].indexOf(":")+3);
                    
                    if(netvals.containsKey(date))
                     {
@@ -539,10 +561,26 @@ public class ServicesHandler {
                     finished = true;
                 }
             }                        
+            int nconns;
+            String nseverity = "";
             for (Map.Entry pair : netvals.entrySet()) {
+                nconns = (int)pair.getValue();                
+                if(nconns<=2)
+                {
+                    nseverity = "OK";
+                }
+                else if (nconns > 2 && nconns < 4)
+                {
+                    nseverity = "WARNING";
+                }
+                else // nconns >4
+                {
+                    nseverity = "CRITICAL";
+                }
                 networkconnsList.add(new GetNetworkConnsListResponse(
                         pair.getKey().toString(),                        
-                        (int)pair.getValue()));
+                        nconns,
+                        nseverity));
             }                
         }catch(IOException e){
             e.printStackTrace();
@@ -553,7 +591,7 @@ public class ServicesHandler {
     }//end getNetworkConnections
     
     public GetNetworkSpeedResponse getNetworkSpeed() {
-        //ts,ts,te,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
+        //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
         GetNetworkSpeedResponse response = new GetNetworkSpeedResponse();        
         ArrayList <GetNetworkSpeedListResponse> networkspeedList = new ArrayList<>();
         CSVReader reader = null;
@@ -568,27 +606,43 @@ public class ServicesHandler {
             while ((line=reader.readNext()) != null && !finished){
                 if(!line[0].equals("Summary"))
                 {                    
-                    Float duration = Float.parseFloat(line[4]);
-                    Float inbytes = Float.parseFloat(line[14]);                    
-                    double bps = duration > 0 ? inbytes/duration : 0.01;
+                    Float duration = Float.parseFloat(line[2]);
+                    Float inbytes = Float.parseFloat(line[12]);                    
+                    double bps = duration > 0.009 ? inbytes/duration : inbytes;
                                         
-                    if(netvals.containsKey(line[2]))
+                    if(netvals.containsKey(line[1]))
                     {
-                        netvals.put(line[2], (netvals.get(line[2]) + bps) /2);
+                        netvals.put(line[1], (netvals.get(line[1]) + bps) /2);
                     }
                     else
                     {
-                        netvals.put(line[2],bps);
+                        netvals.put(line[1],bps);
                     }    
                 }
                 else{
                     finished = true;
                 }
-            }                      
+            }            
+            double nspeed;
+            String nseverity = "";
             for (Map.Entry pair : netvals.entrySet()) {
+                nspeed = (double)pair.getValue();                
+                if(nspeed>2)
+                {
+                    nseverity = "OK";
+                }
+                else if (nspeed > 1.71 && nspeed < 2)
+                {
+                    nseverity = "WARNING";
+                }
+                else // nspeed < 2
+                {
+                    nseverity = "CRITICAL";
+                }
                 networkspeedList.add(new GetNetworkSpeedListResponse(
                         pair.getKey().toString(),                        
-                        (double)pair.getValue()));
+                        nspeed,
+                        nseverity));
             }                
         }catch(IOException e){
             e.printStackTrace();

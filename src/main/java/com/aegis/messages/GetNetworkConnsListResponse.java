@@ -15,9 +15,12 @@ public class GetNetworkConnsListResponse {
 
     private int connections;
 
-    public GetNetworkConnsListResponse(String time, int connections) {
+    private String severity;
+    
+    public GetNetworkConnsListResponse(String time, int connections, String severity) {
         this.time = time;
         this.connections = connections;
+        this.severity = severity;
     }
 
     public String getTime() {
@@ -35,5 +38,12 @@ public class GetNetworkConnsListResponse {
     public void setConnections(int connections) {
         this.connections = connections;
     }
-       
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
 }

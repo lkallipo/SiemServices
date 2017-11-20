@@ -15,9 +15,12 @@ public class GetNetworkSpeedListResponse {
 
     private double bytesPerSec;
 
-    public GetNetworkSpeedListResponse(String time, double bytesPerSec) {
+    private String severity;
+    
+    public GetNetworkSpeedListResponse(String time, double bytesPerSec, String severity) {
         this.time = time;
         this.bytesPerSec = bytesPerSec;
+        this.severity = severity;
     }
 
     public String getTime() {
@@ -35,4 +38,12 @@ public class GetNetworkSpeedListResponse {
     public void setBytesPerSec(double bytesPerSec) {
         this.bytesPerSec = bytesPerSec;
     }     
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }    
 }
