@@ -21,6 +21,7 @@ import com.aegis.messages.GetNetworkLoadListResponse;
 import com.aegis.messages.GetNetworkLoadResponse;
 import com.aegis.messages.GetNetworkSpeedListResponse;
 import com.aegis.messages.GetNetworkSpeedResponse;
+import com.aegis.messages.SimpleResponse;
 import com.aegis.ossimsiem.AcidEvent;
 import com.aegis.ossimsiem.Device;
 import com.aegis.ossimsiem.ExtraData;
@@ -535,7 +536,7 @@ public class ServicesHandler {
                         pair.getKey().toString(),                        
                         nload,
                         nseverity ));
-                LOGGER. info(srcHost + "; Network Load;" +  nseverity +";NLOAD " + nload +" at " + pair.getKey().toString());
+                //LOGGER. info(srcHost + "; Network Load;" +  nseverity +";NLOAD " + nload +" at " + pair.getKey().toString());
             }                
         }catch(IOException e){
             e.printStackTrace();
@@ -545,6 +546,65 @@ public class ServicesHandler {
         
         return response;
     }//end getNetworkLoad
+     
+     public SimpleResponse logNetworkLoad(String srcHost) {
+        //ts,ts,te,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr             
+        CSVReader reader = null;
+        SimpleResponse response = new SimpleResponse("unknown","unknown");
+        String netflowCsv = props.getProperty("netflowcsv");
+        
+       try{
+              reader = new CSVReader(new FileReader(netflowCsv));
+              String[] line = reader.readNext();
+              boolean finished = false;
+            
+            Map <String,Double> netvals = new LinkedHashMap<>();
+            while ((line=reader.readNext()) != null && !finished){
+                if(!line[0].equals("Summary"))
+                {                    
+                    Float duration = Float.parseFloat(line[2]);
+                    Float inpackets = Float.parseFloat(line[11]);                    
+                    double pktps = duration > 0.009 ? inpackets/duration : inpackets;
+                                        
+                    if(netvals.containsKey(line[1]))
+                    {
+                        netvals.put(line[1], (netvals.get(line[1]) + pktps) /2);
+                    }
+                    else
+                    {
+                        netvals.put(line[1],pktps);
+                    }    
+                }
+                else{
+                    finished = true;
+                }
+            }            
+            double nload;
+            String nseverity = "";
+            for (Map.Entry pair : netvals.entrySet()) {
+                nload = (double)pair.getValue();                
+                if(nload<=900)
+                {
+                    nseverity = "OK";
+                }
+                else if (nload > 900 && nload < 1500)
+                {
+                    nseverity = "WARNING";
+                }
+                else // nload >1500
+                {
+                    nseverity = "CRITICAL";
+                }                
+                LOGGER. info(srcHost + "; Network Load;" +  nseverity +";Network Load " + nload +" packets/sec at " + pair.getKey().toString());
+                response.setMessage("Network Load Logged Successfully");
+                response.setStatus("success");
+            }                
+        }catch(IOException e){
+            e.printStackTrace();
+        }                        
+        return response;
+    }//end logNetworkLoad
+    
      
     public GetNetworkConnsResponse getNetworkConnections() {
         //ts,ts,te,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
@@ -604,7 +664,64 @@ public class ServicesHandler {
         
         response.setNetworkConnections(networkconnsList);        
         return response;
-    }//end getNetworkConnections
+      }//end getNetworkConnections
+    
+    public SimpleResponse logNetworkConnections(String srcHost) {
+        //ts,ts,te,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
+        SimpleResponse response = new SimpleResponse("unknown","unknown");        
+        CSVReader reader = null;
+        String netflowCsv = props.getProperty("netflowcsv");
+        
+        try{
+            reader = new CSVReader(new FileReader(netflowCsv));
+            String[] line = reader.readNext();
+            boolean finished = false;            
+            Map <String,Integer> netvals = new LinkedHashMap<>();
+            
+            while ((line=reader.readNext()) != null && !finished){
+                if(!line[0].equals("Summary"))
+                {  //Read flow's start datetime e.g. 2017-06-26 6:17:17
+                   String date = line[0].substring(0,line[0].indexOf(":")+3);
+                   
+                   if(netvals.containsKey(date))
+                    {
+                        netvals.put(date, netvals.get(date) + 1);
+                    }
+                    else
+                    {
+                        netvals.put(date,1);
+                    } 
+                }
+                else{
+                    finished = true;
+                }
+            }                        
+            int nconns;
+            String nseverity = "";
+            for (Map.Entry pair : netvals.entrySet()) {
+                nconns = (int)pair.getValue();                
+                if(nconns<=2)
+                {
+                    nseverity = "OK";
+                }
+                else if (nconns > 2 && nconns < 4)
+                {
+                    nseverity = "WARNING";
+                }
+                else // nconns >4
+                {
+                    nseverity = "CRITICAL";
+                }
+
+                LOGGER. info(srcHost + "; Network Connections;" +  nseverity +";Network Connections " + nconns +" at " + pair.getKey().toString());
+                response.setMessage("Network Connections Logged Successfully");
+                response.setStatus("success");
+            }                
+        }catch(IOException e){
+            e.printStackTrace();
+        }   
+        return response;
+      }//end logNetworkConnections   
     
     public GetNetworkSpeedResponse getNetworkSpeed() {
         //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
@@ -666,6 +783,64 @@ public class ServicesHandler {
         response.setNetworkSpeed(networkspeedList);        
         return response;
     }//end getNetworkSpeed
+    
+    public SimpleResponse logNetworkSpeed(String srcHost) {
+        //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
+        SimpleResponse response = new SimpleResponse("unknown","unknown");        
+        CSVReader reader = null;
+        String netflowCsv = props.getProperty("netflowcsv");
+        
+        try{
+            reader = new CSVReader(new FileReader(netflowCsv));
+            String[] line = reader.readNext();
+            boolean finished = false;
+            
+            Map <String,Double> netvals = new LinkedHashMap<>();
+            while ((line=reader.readNext()) != null && !finished){
+                if(!line[0].equals("Summary"))
+                {                    
+                    Float duration = Float.parseFloat(line[2]);
+                    Float inbytes = Float.parseFloat(line[12]);                    
+                    double bps = duration > 0.009 ? inbytes/duration : inbytes;
+                                        
+                    if(netvals.containsKey(line[1]))
+                    {
+                        netvals.put(line[1], (netvals.get(line[1]) + bps) /2);
+                    }
+                    else
+                    {
+                        netvals.put(line[1],bps);
+                    }    
+                }
+                else{
+                    finished = true;
+                }
+            }            
+            double nspeed;
+            String nseverity = "";
+            for (Map.Entry pair : netvals.entrySet()) {
+                nspeed = (double)pair.getValue();                
+                if(nspeed>2)
+                {
+                    nseverity = "OK";
+                }
+                else if (nspeed > 1.71 && nspeed < 2)
+                {
+                    nseverity = "WARNING";
+                }
+                else // nspeed < 2
+                {
+                    nseverity = "CRITICAL";
+                }
+                LOGGER. info(srcHost + "; Network Speed;" +  nseverity +";Network Speed " + nspeed +" bytes/sec at " + pair.getKey().toString());
+                response.setMessage("Network Speed Logged Successfully");
+                response.setStatus("success");
+            }                
+        }catch(IOException e){
+            e.printStackTrace();
+        }        
+        return response;
+    }//end logNetworkSpeed
      
     private static String getIpfromBytes(byte[] byteip){
      if ( byteip != null &&  byteip.length > 1) {
