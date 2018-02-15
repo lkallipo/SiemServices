@@ -230,7 +230,7 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getNetworkLoad(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
+        response = handler.getNetworkLoad(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),*/srcHost);
         return response;
     }
     

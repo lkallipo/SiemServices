@@ -38,8 +38,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+/*import java.util.logging.Level;
+import java.util.logging.Logger;*/
+import org.apache.log4j.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -51,6 +52,7 @@ public class ServicesHandler {
 
     private final EntityManager em;
     private Properties props;
+    final static Logger LOGGER = Logger.getLogger("NetFlowAgent");
     
     public ServicesHandler(EntityManager em) {
         this.em = em;
@@ -61,7 +63,7 @@ public class ServicesHandler {
         try{
             props.load(resourceStream);
         } catch (IOException ex) {
-            Logger.getLogger(ServicesHandler.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(ServicesHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }  
 
@@ -441,19 +443,32 @@ public class ServicesHandler {
                 if(!line[0].equals("Summary"))
                 {
                //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
-                netflowList.add(new GetNetflowListResponse(
-                        line[0],
+//                netflowList.add(new GetNetflowListResponse(
+//                        line[0],
+//                        line[1],
+//                        Float.parseFloat(line[2]),
+//                        line[3],
+//                        Integer.parseInt(line[5]),
+//                        line[4],
+//                        Integer.parseInt(line[6]),
+//                        line[7],
+//                        Integer.parseInt(line[11]),
+//                        Integer.parseInt(line[13]),
+//                        Integer.parseInt(line[12]),
+//                        Integer.parseInt(line[14])));
+                    netflowList.add(new GetNetflowListResponse(
                         line[1],
-                        Float.parseFloat(line[2]),
                         line[3],
-                        Integer.parseInt(line[5]),
-                        line[4],
-                        Integer.parseInt(line[6]),
-                        line[7],
-                        Integer.parseInt(line[11]),
+                        Float.parseFloat(line[4]),
+                        line[5],
+                        Integer.parseInt(line[7]),
+                        line[6],
+                        Integer.parseInt(line[8]),
+                        line[9],
                         Integer.parseInt(line[13]),
-                        Integer.parseInt(line[12]),
-                        Integer.parseInt(line[14])));
+                        Integer.parseInt(line[15]),
+                        Integer.parseInt(line[14]),
+                        Integer.parseInt(line[16])));
                 }
                 else{
                     finished = true;
@@ -466,7 +481,7 @@ public class ServicesHandler {
         return response;
     }//end getNetFlow
     
-     public GetNetworkLoadResponse getNetworkLoad() {
+     public GetNetworkLoadResponse getNetworkLoad(String srcHost) {
         //ts,ts,te,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,in,out,sas,das,smk,dmk,dtos,dir,nh,nhb,svln,dvln,ismc,odmc,idmc,osmc,mpls1,mpls2,mpls3,mpls4,mpls5,mpls6,mpls7,mpls8,mpls9,mpls10,cl,sl,al,ra,eng,exid,tr
         GetNetworkLoadResponse response = new GetNetworkLoadResponse();        
         ArrayList <GetNetworkLoadListResponse> networkloadList = new ArrayList<GetNetworkLoadListResponse>();
@@ -520,6 +535,7 @@ public class ServicesHandler {
                         pair.getKey().toString(),                        
                         nload,
                         nseverity ));
+                LOGGER. info(srcHost + "; Network Load;" +  nseverity +";NLOAD " + nload +" at " + pair.getKey().toString());
             }                
         }catch(IOException e){
             e.printStackTrace();
@@ -656,7 +672,7 @@ public class ServicesHandler {
          try {
              return InetAddress.getByAddress(byteip).getHostAddress();
          } catch (UnknownHostException ex) {
-             Logger.getLogger(ServicesHandler.class.getName()).log(Level.SEVERE, null, ex);
+             LOGGER.error( null, ex);
              return "";
          }
        }
