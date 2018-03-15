@@ -496,19 +496,19 @@ public class ServicesHandler {
             
             Map <String,Double> netvals = new LinkedHashMap<>();
             while ((line=reader.readNext()) != null && !finished){
-                if(!line[0].equals("Summary"))
+                if(!line[0].startsWith("Summary"))
                 {                    
-                    Float duration = Float.parseFloat(line[2]);
-                    Float inpackets = Float.parseFloat(line[11]);                    
+                    Float duration = Float.parseFloat(line[2].trim());
+                    Float inpackets = Float.parseFloat(line[8].trim());                    
                     double pktps = duration > 0.009 ? inpackets/duration : inpackets;
                                         
-                    if(netvals.containsKey(line[1]))
+                    if(netvals.containsKey(line[1].trim()))
                     {
-                        netvals.put(line[1], (netvals.get(line[1]) + pktps) /2);
+                        netvals.put(line[1].trim(), (netvals.get(line[1].trim()) + pktps) /2);
                     }
                     else
                     {
-                        netvals.put(line[1],pktps);
+                        netvals.put(line[1].trim(),pktps);
                     }    
                 }
                 else{
