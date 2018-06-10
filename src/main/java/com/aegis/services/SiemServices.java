@@ -112,7 +112,7 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Current Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        response = handler.getExtraData("Server Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
         return response;
     }
     
@@ -236,6 +236,22 @@ public class SiemServices {
     }
     
     @GET
+    @Path("/getNetLoad")    
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetNetworkLoadResponse getNetLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetNetworkLoadResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetLoaddata("Network Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, false);
+        return response;
+    }
+    
+    @GET
     @Path("/logNetworkLoad")    
     @Produces(MediaType.APPLICATION_JSON)
     public SimpleResponse logNetWorkLoad(/*@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, */ @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
@@ -264,6 +280,23 @@ public class SiemServices {
         }
         handler = new ServicesHandler(em);
         response = handler.getNetworkConnections(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
+        return response;
+    }
+    
+        
+    @GET
+    @Path("/getNetConnections")    
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetNetworkConnsResponse getNetConnections(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetNetworkConnsResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetConnectionsdata("Network Connections",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, false);
         return response;
     }
     
@@ -299,7 +332,23 @@ public class SiemServices {
         return response;
     }
     
-        @GET
+    @GET
+    @Path("/getNetSpeed")    
+    @Produces(MediaType.APPLICATION_JSON)
+    public GetNetworkSpeedResponse getNetSpeed(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        GetNetworkSpeedResponse response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetSpeeddata("Network Speed",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, false);
+        return response;
+    }
+    
+    @GET
     @Path("/logNetworkSpeed")    
     @Produces(MediaType.APPLICATION_JSON)
     public SimpleResponse logNetworkSpeed(/*@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, */ @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {

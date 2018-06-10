@@ -233,13 +233,20 @@ public class ServicesHandler {
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
                      */
-                    String checkHostName = relatedAcidEvent.getSrcHostname();
+                   
+                    int checkDeviceId = relatedAcidEvent.getDeviceId();
+                   // HCPB: check device id instead of srcHostname
+                   
+                   
                     if (!srcHost.equals("any")) {
-                        checkHostName = srcHost;
-                    }
-
+                        //checkHostName = srcHost;
+                        checkDeviceId = Integer.parseInt(srcHost);
+                    }              
+                    
                     if (!severity || (severity && isWarnOrError)) {
-                        if (relatedAcidEvent.getSrcHostname().equals(checkHostName)
+                        //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
+                        // HCPB: check device id instead of srcHostname
+                        if (relatedAcidEvent.getDeviceId() == checkDeviceId
                                 && relatedAcidEvent.getTimestamp().getTime() >= startDate
                                 && relatedAcidEvent.getTimestamp().getTime() <= endDate) {
 
@@ -249,139 +256,161 @@ public class ServicesHandler {
                                     relatedAcidEvent.getTimestamp(),
                                     relatedAcidEvent.getSrcHostname());
 
-                            if (userDataValue.equals("Server Load")) {
-                            //if (userDataValue.equals("Current Load")) {
-                                String[] loadvalues = new String[3];
-                                String values = "";
-                                if (extra.getUserdata5().contains("average")) {
-                                    values = extra.getUserdata5();
-                                } else if (extra.getUserdata4().contains("average")) {
-                                    values = extra.getUserdata4();
-                                }
-                                // XL-SIEM database
-                                else if (extra.getUserdata1().contains("average")) {
-                                    values = extra.getUserdata1();
-                                }
-                                
-                                
-                                if (!values.equals("")) {
-                                    String loadvalue = values.substring(values.lastIndexOf("average: ") + 9);
-                                    loadvalues = loadvalue.split(", ");
-                                    extraDataList.add(new GetExtraDataListResponse(
-                                            extra.getEventId(),
-                                            extra.getDataPayload(),
-                                            //extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
-                                            currentEventSeverity,
-                                            loadvalues[0],
-                                            loadvalues[1],
-                                            loadvalues[2].trim(),
-                                            null,
-                                            null,
-                                            acideventResponse
-                                    ));
-                                }
-                                response.setExtraData(extraDataList);
-                            } else if (userDataValue.equals("Total Processes")) {
-                                String values = "";
-                                if (extra.getUserdata4().contains("processes")) {
-                                    values = extra.getUserdata4();
-                                } else if (extra.getUserdata5().contains("processes")) {
-                                    values = extra.getUserdata5();
-                                }
-                                // XL-SIEM database
-                                else if (extra.getUserdata1().contains("processes")) {
-                                    values = extra.getUserdata1();
-                                }
-                                
-                                /*review hack*/
-                                 if (currentEventSeverity.equals("CRITICAL")){
-                                     currentEventSeverity = "WARNING";
-                                }  
-                    
-                                if (!values.equals("")) {
-                                    String loadvalue = values.substring(values.lastIndexOf(": ") + 2, values.lastIndexOf(" processes"));
-
-                                    extraDataList.add(new GetExtraDataListResponse(
-                                            extra.getEventId(),
-                                            extra.getDataPayload(),
-                                            currentEventSeverity,                                            
-                                            null,
-                                            null,
-                                            null,
-                                            loadvalue,
-                                            null,
-                                            acideventResponse
-                                    ));
-                                }
-                                response.setExtraData(extraDataList);
-                            } else if (userDataValue.equals("Current Users")) {
-                                String values = "";
-                                if (extra.getUserdata4().contains("users currently")) {
-                                    values = extra.getUserdata4();
-                                } else if (extra.getUserdata5().contains("users currently")) {
-                                    values = extra.getUserdata5();
-                                }
-
-                                if (!values.equals("")) {
-                                    // e.g.USERS OK - 0 users currently logged in 
-                                    if (values.contains("- ") && values.contains(" users")
-                                            && extra.getUserdata1().contains(" ")) {
-                                        String usersvalue = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" users"));
-
-                                        extraDataList.add(new GetExtraDataListResponse(
-                                                extra.getEventId(),
-                                                extra.getDataPayload(),
-                                                extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
-                                                null,
-                                                null,
-                                                null,
-                                                null,
-                                                usersvalue,
-                                                acideventResponse
-                                        ));
+                            switch (userDataValue) {
+                                case "Server Load":
+                                    {
+                                        //if (userDataValue.equals("Current Load")) {
+                                        String[] loadvalues = new String[3];
+                                        String values = "";
+                                        if (extra.getUserdata5().contains("average")) {
+                                            values = extra.getUserdata5();
+                                        } else if (extra.getUserdata4().contains("average")) {
+                                            values = extra.getUserdata4();
+                                        }
+                                        // XL-SIEM database
+                                        else if (extra.getUserdata1().contains("average")) {
+                                            values = extra.getUserdata1();
+                                        }       if (!values.equals("")) {
+                                            String loadvalue = values.substring(values.lastIndexOf("average: ") + 9);
+                                            loadvalues = loadvalue.split(", ");
+                                            extraDataList.add(new GetExtraDataListResponse(
+                                                    extra.getEventId(),
+                                                    extra.getDataPayload(),
+                                                    //extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                                    currentEventSeverity,
+                                                    loadvalues[0],
+                                                    loadvalues[1],
+                                                    loadvalues[2].trim(),
+                                                    null,
+                                                    null,
+                                                    acideventResponse
+                                            ));
+                                        }       response.setExtraData(extraDataList);
+                                        break;
                                     }
-                                }
-                                response.setExtraData(extraDataList);
-                            } else if (userDataValue.equals("HTTP")) {
-
-                                String values = "";
-                                /* Userdata 4 gets populated when 3xx http response */
-                                if (extra.getUserdata4().contains("HTTP OK")) {
-                                    values = extra.getUserdata4();
-                                    /* Userdata  gets populated when 2xx http response */
-                                } else if (extra.getUserdata5().contains("HTTP OK")) {
-                                    values = extra.getUserdata5();
-                                } else {
-                                    values = "0";
-                                }
-
-                                if (!values.equals("")) {
-                                    // e.g.USERS OK - 0 users currently logged in 
-                                    if (values.contains("- ") && values.contains("in ")
-                                            && values.contains(" bytes") && values.contains(" second")) {
-                                        String bytes = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" bytes"));
-                                        String seconds = values.substring(values.lastIndexOf("in ") + 2, values.lastIndexOf(" second"));
-
-                                        double throuput = Double.parseDouble(bytes) / Double.parseDouble(seconds) / 1000;
-
-                                        httpResponseList.add(new GetHttpStatusResponse(
-                                                extra.getEventId(),
-                                                extra.getDataPayload(),
-                                                extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
-                                                String.format("%.2f", throuput),
-                                                acideventResponse
-                                        ));
-                                    } else if (values.equals("0")) {
-                                        httpResponseList.add(new GetHttpStatusResponse(
-                                                extra.getEventId(),
-                                                extra.getDataPayload(),
-                                                extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
-                                                "0",
-                                                acideventResponse
-                                        ));
+                                case "Total Processes":
+                                    {
+                                        String values = "";
+                                        if (extra.getUserdata4().contains("processes")) {
+                                            values = extra.getUserdata4();
+                                        } else if (extra.getUserdata5().contains("processes")) {
+                                            values = extra.getUserdata5();
+                                        }
+                                        // XL-SIEM database
+                                        else if (extra.getUserdata1().contains("processes")) {
+                                            values = extra.getUserdata1();
+                                        }       /*review hack*/
+                                        if (currentEventSeverity.equals("CRITICAL")){
+                                            currentEventSeverity = "WARNING";
+                                        }       if (!values.equals("")) {
+                                            String loadvalue = values.substring(values.lastIndexOf(": ") + 2, values.lastIndexOf(" processes"));
+                                            
+                                            extraDataList.add(new GetExtraDataListResponse(
+                                                    extra.getEventId(),
+                                                    extra.getDataPayload(),
+                                                    currentEventSeverity,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    loadvalue,
+                                                    null,
+                                                    acideventResponse
+                                            ));
+                                        }       response.setExtraData(extraDataList);
+                                        break;
                                     }
-                                }
-                                response.setExtraData(httpResponseList);
+                                case "Current Users":
+                                    {
+                                        String values = "";
+                                        if (extra.getUserdata4().contains("users currently")) {
+                                            values = extra.getUserdata4();
+                                        } else if (extra.getUserdata5().contains("users currently")) {
+                                            values = extra.getUserdata5();
+                                        }       if (!values.equals("")) {
+                                            // e.g.USERS OK - 0 users currently logged in
+                                            if (values.contains("- ") && values.contains(" users")
+                                                    && extra.getUserdata1().contains(" ")) {
+                                                String usersvalue = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" users"));
+                                                
+                                                extraDataList.add(new GetExtraDataListResponse(
+                                                        extra.getEventId(),
+                                                        extra.getDataPayload(),
+                                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        usersvalue,
+                                                        acideventResponse
+                                                ));
+                                            }
+                                        }       response.setExtraData(extraDataList);
+                                        break;
+                                    }
+                                case "HTTP":
+                                    {
+                                        String values = "";
+                                        /* Userdata 4 gets populated when 3xx http response */
+                                        if (extra.getUserdata4().contains("HTTP OK")) {
+                                            values = extra.getUserdata4();
+                                            /* Userdata  gets populated when 2xx http response */
+                                        } else if (extra.getUserdata5().contains("HTTP OK")) {
+                                            values = extra.getUserdata5();
+                                        } else {
+                                            values = "0";
+                                        }       if (!values.equals("")) {
+                                            // e.g.USERS OK - 0 users currently logged in
+                                            if (values.contains("- ") && values.contains("in ")
+                                                    && values.contains(" bytes") && values.contains(" second")) {
+                                                String bytes = values.substring(values.lastIndexOf("- ") + 2, values.lastIndexOf(" bytes"));
+                                                String seconds = values.substring(values.lastIndexOf("in ") + 2, values.lastIndexOf(" second"));
+                                                
+                                                double throuput = Double.parseDouble(bytes) / Double.parseDouble(seconds) / 1000;
+                                                
+                                                httpResponseList.add(new GetHttpStatusResponse(
+                                                        extra.getEventId(),
+                                                        extra.getDataPayload(),
+                                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                                        String.format("%.2f", throuput),
+                                                        acideventResponse
+                                                ));
+                                            } else if (values.equals("0")) {
+                                                httpResponseList.add(new GetHttpStatusResponse(
+                                                        extra.getEventId(),
+                                                        extra.getDataPayload(),
+                                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                                        "0",
+                                                        acideventResponse
+                                                ));
+                                            }
+                                        }       response.setExtraData(httpResponseList);
+                                        break;
+                                    }
+                                    case "Network Connections":
+                                    {
+                                        String values = "";
+                                        if (extra.getDataPayload().contains("Network Connections")) {
+                                            values = extra.getUserdata2();
+                                        }   
+                                        
+                                        if (!values.equals("")) {                                         
+                                                extraDataList.add(new GetExtraDataListResponse(
+                                                        extra.getEventId(),
+                                                        extra.getDataPayload(),
+                                                        extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        values,
+                                                        acideventResponse
+                                                ));                                            
+                                        }       
+                                        response.setExtraData(extraDataList);
+                                        break;
+                                    }
+                                default:
+                                    break;
                             }
                         }
                     }
@@ -395,7 +424,272 @@ public class ServicesHandler {
         } catch (Exception e) {
         }
         return response;
-    }//end getProjects    
+    }//end getExtaData
+
+     /*
+    * Gets extradata that associated Event happened after startDate
+     */
+    public GetNetworkConnsResponse getNetConnectionsdata(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
+        //*********************** Variables ***************************
+        GetNetworkConnsResponse response = new GetNetworkConnsResponse();
+        List<ExtraData> extraDataparamsList;
+        ArrayList<GetNetworkConnsListResponse> extraDataList;
+      
+        try {
+            //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue +"%").getResultList();
+
+            if (!extraDataparamsList.isEmpty()) {
+                extraDataList = new ArrayList<>();
+
+                for (ExtraData extra : extraDataparamsList) {
+
+                    boolean isWarnOrError = false;
+                    String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+                                                       
+                    if (severity) {
+                        if (currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL")) {
+                            isWarnOrError = true;
+                        }
+                    }
+                    TypedQuery<AcidEvent> query1;
+                    query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
+                    query1.setParameter("eventId", extra.getEventId());
+                    AcidEvent relatedAcidEvent = query1.getSingleResult();
+
+                    /* Assign checkHostName the name of the event by default
+                       but if passed as a parameter then set it to it.
+                     */
+                   
+                    int checkDeviceId = relatedAcidEvent.getDeviceId();
+                   // HCPB: check device id instead of srcHostname
+                   
+                   
+                    if (!srcHost.equals("any")) {
+                        //checkHostName = srcHost;
+                        checkDeviceId = Integer.parseInt(srcHost);
+                    }              
+                    
+                    if (!severity || (severity && isWarnOrError)) {
+                        //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
+                        // HCPB: check device id instead of srcHostname
+                        if (relatedAcidEvent.getDeviceId() == checkDeviceId
+                                && relatedAcidEvent.getTimestamp().getTime() >= startDate
+                                && relatedAcidEvent.getTimestamp().getTime() <= endDate) {                            
+
+                            switch (userDataValue) {                                
+                                    case "Network Connections":
+                                    {
+                                        String values = "";
+                                        String datetime = "";
+                                        if (extra.getDataPayload().contains("Network Connections")) {
+                                            values = extra.getUserdata2();
+                                            datetime = extra.getUserdata3();
+                                        }                                        
+                                        
+                                        if (!values.equals("")) {    
+                                            extraDataList.add(new GetNetworkConnsListResponse(
+                                            datetime,                        
+                                            Integer.parseInt(values),
+                                            currentEventSeverity));                                                                                         
+                                        }       
+                                        response.setNetworkConnections(extraDataList);
+                                        break;
+                                    }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                return response;
+            } else {
+                extraDataList = new ArrayList<>();
+                response.setNetworkConnections(extraDataList);
+                return response;
+            }
+        } catch (Exception e) {
+        }
+        return response;
+    }//end getNetFlowdata
+    
+     /*
+    * Gets extradata that associated Event happened after startDate
+     */
+    public GetNetworkLoadResponse getNetLoaddata(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
+        //*********************** Variables ***************************
+        GetNetworkLoadResponse response = new GetNetworkLoadResponse();
+        List<ExtraData> extraDataparamsList;
+        ArrayList<GetNetworkLoadListResponse> extraDataList;
+      
+        try {
+            //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue +"%").getResultList();
+
+            if (!extraDataparamsList.isEmpty()) {
+                extraDataList = new ArrayList<>();
+
+                for (ExtraData extra : extraDataparamsList) {
+
+                    boolean isWarnOrError = false;
+                    String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+                                                       
+                    if (severity) {
+                        if (currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL")) {
+                            isWarnOrError = true;
+                        }
+                    }
+                    TypedQuery<AcidEvent> query1;
+                    query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
+                    query1.setParameter("eventId", extra.getEventId());
+                    AcidEvent relatedAcidEvent = query1.getSingleResult();
+
+                    /* Assign checkHostName the name of the event by default
+                       but if passed as a parameter then set it to it.
+                     */
+                   
+                    int checkDeviceId = relatedAcidEvent.getDeviceId();
+                   // HCPB: check device id instead of srcHostname
+                   
+                   
+                    if (!srcHost.equals("any")) {
+                        //checkHostName = srcHost;
+                        checkDeviceId = Integer.parseInt(srcHost);
+                    }              
+                    
+                    if (!severity || (severity && isWarnOrError)) {
+                        //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
+                        // HCPB: check device id instead of srcHostname
+                        if (relatedAcidEvent.getDeviceId() == checkDeviceId
+                                && relatedAcidEvent.getTimestamp().getTime() >= startDate
+                                && relatedAcidEvent.getTimestamp().getTime() <= endDate) {                            
+
+                            switch (userDataValue) {                                
+                                    case "Network Load":
+                                    {
+                                        String values = "";
+                                        String datetime = "";
+                                        Double packets = 0.0;
+                                        if (extra.getDataPayload().contains("Network Load")) {
+                                            values = extra.getUserdata2();
+                                            datetime = extra.getUserdata3();                                            
+                                            packets = Double.parseDouble(values.substring(0,values.indexOf(" ")));
+                                        }                                        
+                                        
+                                        if (!values.equals("")) {    
+                                            extraDataList.add(new GetNetworkLoadListResponse(
+                                            datetime,                        
+                                            packets,
+                                            currentEventSeverity));                                                                                         
+                                        }       
+                                        response.setNetworkLoad(extraDataList);
+                                        break;
+                                    }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                return response;
+            } else {
+                extraDataList = new ArrayList<>();
+                response.setNetworkLoad(extraDataList);
+                return response;
+            }
+        } catch (Exception e) {
+        }
+        return response;
+    }//end getNetLoaddata
+    
+     /*
+    * Gets extradata that associated Event happened after startDate
+     */
+    public GetNetworkSpeedResponse getNetSpeeddata(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
+        //*********************** Variables ***************************
+        GetNetworkSpeedResponse response = new GetNetworkSpeedResponse();
+        List<ExtraData> extraDataparamsList;
+        ArrayList<GetNetworkSpeedListResponse> extraDataList;
+      
+        try {
+            //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue +"%").getResultList();
+
+            if (!extraDataparamsList.isEmpty()) {
+                extraDataList = new ArrayList<>();
+
+                for (ExtraData extra : extraDataparamsList) {
+
+                    boolean isWarnOrError = false;
+                    String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+                                                       
+                    if (severity) {
+                        if (currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL")) {
+                            isWarnOrError = true;
+                        }
+                    }
+                    TypedQuery<AcidEvent> query1;
+                    query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
+                    query1.setParameter("eventId", extra.getEventId());
+                    AcidEvent relatedAcidEvent = query1.getSingleResult();
+
+                    /* Assign checkHostName the name of the event by default
+                       but if passed as a parameter then set it to it.
+                     */
+                   
+                    int checkDeviceId = relatedAcidEvent.getDeviceId();
+                   // HCPB: check device id instead of srcHostname
+                   
+                   
+                    if (!srcHost.equals("any")) {
+                        //checkHostName = srcHost;
+                        checkDeviceId = Integer.parseInt(srcHost);
+                    }              
+                    
+                    if (!severity || (severity && isWarnOrError)) {
+                        //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
+                        // HCPB: check device id instead of srcHostname
+                        if (relatedAcidEvent.getDeviceId() == checkDeviceId
+                                && relatedAcidEvent.getTimestamp().getTime() >= startDate
+                                && relatedAcidEvent.getTimestamp().getTime() <= endDate) {                            
+
+                            switch (userDataValue) {                                
+                                    case "Network Speed":
+                                    {
+                                        String values = "";
+                                        String datetime = "";
+                                        Double bytes = 0.0;
+                                        if (extra.getDataPayload().contains("Network Speed")) {
+                                            values = extra.getUserdata2();
+                                            datetime = extra.getUserdata3();                                            
+                                            bytes = Double.parseDouble(values.substring(0,values.indexOf(" ")));
+                                        }                                        
+                                        
+                                        if (!values.equals("") && bytes >0) {    
+                                            extraDataList.add(new GetNetworkSpeedListResponse(
+                                            datetime,                        
+                                            bytes,
+                                            currentEventSeverity));                                                                                         
+                                        }       
+                                        response.setNetworkSpeed(extraDataList);
+                                        break;
+                                    }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                return response;
+            } else {
+                extraDataList = new ArrayList<>();
+                response.setNetworkSpeed(extraDataList);
+                return response;
+            }
+        } catch (Exception e) {
+        }
+        return response;
+    }//end getNetSpeeddata
      
     /*
     * Gets extradata that associated Event happened after startDate
