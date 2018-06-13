@@ -665,7 +665,7 @@ public class ServicesHandler {
                                             bytes = Double.parseDouble(values.substring(0,values.indexOf(" ")));
                                         }                                        
                                         
-                                        if (!values.equals("") && bytes >0) {    
+                                        if (!values.equals("") ) {    
                                             extraDataList.add(new GetNetworkSpeedListResponse(
                                             datetime,                        
                                             bytes,
@@ -734,8 +734,9 @@ public class ServicesHandler {
             reader = new CSVReader(new FileReader(netflowCsv));
             String[] line = reader.readNext();
             boolean finished = false;
+           
             while ((line=reader.readNext()) != null && !finished){
-                if(!line[0].equals("Summary"))
+                if(!line[0].contains("Summary"))
                 {
                //ts,te,td,sa,da,sp,dp,pr,flg,fwd,stos,ipkt,ibyt,opkt,obyt,...
 //                netflowList.add(new GetNetflowListResponse(
@@ -751,7 +752,24 @@ public class ServicesHandler {
 //                        Integer.parseInt(line[13]),
 //                        Integer.parseInt(line[12]),
 //                        Integer.parseInt(line[14])));
+                    
+         // Date first seen, Date last seen, Duration, Proto,Src IP Addr, Src Port, Dst IP Addr, Dst Port,Packets,Bytes,bps,pps
+           
                     netflowList.add(new GetNetflowListResponse(
+                        line[0],
+                        line[1],
+                        Float.parseFloat(line[2].trim()),
+                        line[4],
+                        Integer.parseInt(line[5].trim()),
+                        line[6],
+                        Integer.parseInt(line[7].trim().replace(".", "")),
+                        line[3],
+                        Integer.parseInt(line[8].trim()),
+                        Integer.parseInt(line[8].trim()),
+                        Integer.parseInt(line[9].trim()),
+                        Integer.parseInt(line[9].trim())));
+                            
+                   /* netflowList.add(new GetNetflowListResponse(
                         line[1],
                         line[3],
                         Float.parseFloat(line[4]),
@@ -763,7 +781,7 @@ public class ServicesHandler {
                         Integer.parseInt(line[13]),
                         Integer.parseInt(line[15]),
                         Integer.parseInt(line[14]),
-                        Integer.parseInt(line[16])));
+                        Integer.parseInt(line[16])));*/          
                 }
                 else{
                     finished = true;
