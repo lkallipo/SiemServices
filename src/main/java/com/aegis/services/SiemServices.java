@@ -130,7 +130,8 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Server Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        /* CPU Load for HCPB pilot */
+        response = handler.getExtraData("CPU Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
         return response;
     }
     

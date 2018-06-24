@@ -198,12 +198,15 @@ public class ServicesHandler {
         TypedQuery query;
       
         try {
-            extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
+            //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
+             extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue +"%").getResultList();
+
             //extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.userdata1 LIKE :userdata1").setParameter("userdata1", "%" + userDataValue +"%").getResultList();
 
             if (!extraDataparamsList.isEmpty()) {
                 extraDataList = new ArrayList<>();
-
+                response.setExtraData(extraDataList);
+                
                 for (ExtraData extra : extraDataparamsList) {
 
                     boolean isWarnOrError = false;
@@ -288,6 +291,32 @@ public class ServicesHandler {
                                         }       response.setExtraData(extraDataList);
                                         break;
                                     }
+                               /* HCPB Pilot */     
+                               case "CPU Load":
+                                    {
+                                        //if (userDataValue.equals("Current Load")) {
+                                        String[] loadvalues = new String[3];
+                                        String values = "";
+                                        if (extra.getUserdata3().contains("1m")) {
+                                            values = extra.getUserdata3();
+                                        }
+                                        if (!values.equals("")) {
+                                            loadvalues = values.split(", ");
+                                            extraDataList.add(new GetExtraDataListResponse(
+                                                    extra.getEventId(),
+                                                    extra.getDataPayload(),
+                                                    //extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1),
+                                                    currentEventSeverity,
+                                                    loadvalues[0].trim().substring(loadvalues[0].indexOf(": ") + 2, loadvalues[0].indexOf("%")),
+                                                    loadvalues[1].trim().substring(loadvalues[1].indexOf(": ") + 2, loadvalues[1].indexOf("%")),
+                                                    loadvalues[2].trim().substring(loadvalues[2].indexOf(": ") + 2, loadvalues[2].indexOf("%")),
+                                                    null,
+                                                    null,
+                                                    acideventResponse
+                                            ));
+                                        }       response.setExtraData(extraDataList);
+                                        break;
+                                    }     
                                 case "Total Processes":
                                     {
                                         String values = "";
