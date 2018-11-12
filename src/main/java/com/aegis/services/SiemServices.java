@@ -216,7 +216,7 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getNetFlow(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
+        response = handler.getNetFlow(Long.parseLong(starttimestamp),Long.parseLong(endtimestamp)/*,srcHost*/);
         return response;
     }
     

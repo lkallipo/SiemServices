@@ -38,21 +38,21 @@ public class GetNetflowListResponse {
     private String protocol;
     
     //ipkt
-    private int incomingPackets;
+    private int packets;
     
     //opkt
-    private int outgoingPackets;
+    private double bytes;
     
     //ipkt
-    private int incomingBytes;
+    private int bytesPerSec;
     
     //opkt
-    private int outgoingBytes;
+    private int packetsPerSec;
 
     public GetNetflowListResponse(String timestart, String timeend, float duration, 
             String srcAddress, int srcPort, String dstAddress, int dstPort, 
-            String protocol, int incomingPackets, int outgoingPackets, 
-            int incomingBytes, int outgoingBytess) {
+            String protocol, int packets, double bytes, 
+            int bytesPerSec, int packetsPerSec) {
         this.timestart = timestart;
         this.timeend = timeend;
         this.duration = duration;
@@ -61,10 +61,10 @@ public class GetNetflowListResponse {
         this.dstAddress = dstAddress;
         this.dstPort = dstPort;
         this.protocol = protocol;
-        this.incomingPackets = incomingPackets;
-        this.outgoingPackets = outgoingPackets;
-        this.incomingBytes = incomingBytes;
-        this.outgoingBytes = outgoingBytes;
+        this.packets = packets;
+        this.bytes = bytes;
+        this.bytesPerSec = bytesPerSec;
+        this.packetsPerSec = packetsPerSec;
     }
 
     public String getTimestart() {
@@ -131,37 +131,36 @@ public class GetNetflowListResponse {
         this.protocol = protocol;
     }
 
-    public int getIncomingPackets() {
-        return incomingPackets;
+    public int getPackets() {
+        return packets;
     }
 
-    public void setIncomingPackets(int incomingPackets) {
-        this.incomingPackets = incomingPackets;
+    public void setPackets(int packets) {
+        this.packets = packets;
     }
 
-    public int getOutgoingPackets() {
-        return outgoingPackets;
+    public double getBytes() {
+        return bytes;
     }
 
-    public void setOutgoingPackets(int outgoingPackets) {
-        this.outgoingPackets = outgoingPackets;
+    public void setBytes(double bytes) {
+        this.bytes = bytes;
     }
 
-    public int getIncomingBytes() {
-        return incomingBytes;
+    public int getBytesPerSec() {
+        return bytesPerSec;
     }
 
-    public void setIncomingBytes(int incomingBytes) {
-        this.incomingBytes = incomingBytes;
+    public void setBytesPerSec(int bytesPerSec) {
+        this.bytesPerSec = bytesPerSec;
     }
 
-    public int getOutgoingBytes() {
-        return outgoingBytes;
+    public int getPacketsPerSec() {
+        return packetsPerSec;
     }
 
-    public void setOutgoingBytes(int outgoingBytes) {
-        this.outgoingBytes = outgoingBytes;
+    public void setPacketsPerSec(int packetsPerSec) {
+        this.packetsPerSec = packetsPerSec;
     }
-    
     
 }

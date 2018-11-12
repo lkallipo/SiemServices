@@ -26,11 +26,16 @@ import com.aegis.ossimsiem.AcidEvent;
 import com.aegis.ossimsiem.Device;
 import com.aegis.ossimsiem.ExtraData;
 import com.opencsv.CSVReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,6 +44,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.stream.Stream;
 /*import java.util.logging.Level;
 import java.util.logging.Logger;*/
 import org.apache.log4j.Logger;
@@ -481,11 +489,19 @@ public class ServicesHandler {
                             isWarnOrError = true;
                         }
                     }
+                    
+                    try{
                     TypedQuery<AcidEvent> query1;
                     query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
                     query1.setParameter("eventId", extra.getEventId());
-                    AcidEvent relatedAcidEvent = query1.getSingleResult();
-
+                    Object objec = query1.getSingleResult();
+                   // AcidEvent relatedAcidEvent = query1.getSingleResult();
+                    
+                    }
+                    catch (Exception e) {
+                     System.out.println(e.getMessage());         // Never gets here
+                    }
+                    AcidEvent relatedAcidEvent = null;
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
                      */
@@ -751,16 +767,34 @@ public class ServicesHandler {
         }
         return response;
     }//end getProjects
-     
-    public GetNetflowResponse getNetFlow() {
+    
+    /* 
+     *  Returns netflows by reading all nfcapd files with flows captured in
+     *  between the given dates
+     */ 
+    public GetNetflowResponse getNetFlow(long startDate, long endDate) {
 
         GetNetflowResponse response = new GetNetflowResponse();        
         ArrayList<GetNetflowListResponse> netflowList = new ArrayList<GetNetflowListResponse>();
         CSVReader reader = null;
         String netflowCsv = props.getProperty("netflowcsv");
         
+        final File folder;
+        List<String> csvlist = new ArrayList<>();
+        
+        try {
+            folder = new File(netflowCsv).getCanonicalFile();
+            csvlist = listFilesForFolder(folder,startDate,endDate);
+        } catch (IOException ex) {
+            Logger.getLogger(ServicesHandler.class.getName()).error(ex);           
+        }
+   
+        for(String csvfile:csvlist)
+        {
+           System.out.println("Now processing " + csvfile);      
+        
         try{
-            reader = new CSVReader(new FileReader(netflowCsv));
+            reader = new CSVReader(new FileReader(netflowCsv + "/" + csvfile));
             String[] line = reader.readNext();
             boolean finished = false;
            
@@ -783,20 +817,34 @@ public class ServicesHandler {
 //                        Integer.parseInt(line[14])));
                     
          // Date first seen, Date last seen, Duration, Proto,Src IP Addr, Src Port, Dst IP Addr, Dst Port,Packets,Bytes,bps,pps
-           
+                    double flowbytes = 0;
+                    if (!line[9].contains("M")) {
+                        flowbytes = Double.parseDouble(line[9].trim());
+                    } else {
+                        flowbytes = Double.parseDouble(line[9].trim().substring(0, line[9].trim().indexOf(" M"))) * 1000000;
+                    }
+                    
+                    double bps = 0;
+                    if (!line[10].contains("M")) {
+                        bps = Double.parseDouble(line[10].trim());
+                    } else {
+                        bps = Double.parseDouble(line[10].trim().substring(0, line[10].trim().indexOf(" M"))) * 1000000;
+                    }
+                    
                     netflowList.add(new GetNetflowListResponse(
-                        line[0],
-                        line[1],
-                        Float.parseFloat(line[2].trim()),
-                        line[4],
-                        Integer.parseInt(line[5].trim()),
-                        line[6],
-                        Integer.parseInt(line[7].trim().replace(".", "")),
-                        line[3],
-                        Integer.parseInt(line[8].trim()),
-                        Integer.parseInt(line[8].trim()),
-                        Integer.parseInt(line[9].trim()),
-                        Integer.parseInt(line[9].trim())));
+                        line[0], // Date first seen
+                        line[1], // Date last seen
+                        Float.parseFloat(line[2].trim()), //Duration
+                        line[4].trim(), //Src IP Addr
+                        Integer.parseInt(line[5].trim()), //Src Port
+                        line[6].trim(), //Dst IP Addr
+                        Integer.parseInt(line[7].trim().replace(".", "")), //Dst Port
+                        line[3].trim(), //Proto
+                        Integer.parseInt(line[8].trim()), // Packets
+                        flowbytes, //Bytes
+                        (int) bps, //bps
+                        Integer.parseInt(line[11].trim())) //pps
+                    );
                             
                    /* netflowList.add(new GetNetflowListResponse(
                         line[1],
@@ -818,7 +866,8 @@ public class ServicesHandler {
             }            
         }catch(IOException e){
             e.printStackTrace();
-        }        
+        }  
+        }
         response.setNetflowList(netflowList);        
         return response;
     }//end getNetFlow
@@ -1209,4 +1258,35 @@ public class ServicesHandler {
             m.put(e.getKey(), e.getValue());
         }
     }
+
+    /* Retuns all files in given folder with date in name between given dates */
+    public List<String> listFilesForFolder(final File folder, long startDate, long endDate) {
+        List<String> csvfiles = new ArrayList<>();
+
+        SimpleDateFormat sdfstart = new SimpleDateFormat("yyyyMMddHHmm");
+        sdfstart.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String timeStart = sdfstart.format(startDate);
+        SimpleDateFormat sdfend = new SimpleDateFormat("yyyyMMddHHmm");
+        sdfend.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String timeEnd = sdfstart.format(endDate);
+
+        System.out.println("Start and End " + timeStart + "  " + timeEnd);  
+        for (final File fileEntry : folder.listFiles()) {
+            if (fileEntry.isDirectory()) {
+                listFilesForFolder(fileEntry, startDate, endDate);
+            } else {
+                String fileName = fileEntry.getName();
+                String fileDate = fileName.substring(fileName.indexOf(".") + 1, fileName.indexOf(".csv"));
+                Long fileDateLong = Long.parseLong(fileDate);
+                 System.out.println("Start  End fileDateLong " + timeStart + "  " + timeEnd + " " + fileDateLong);  
+                if (timeStart.compareTo(fileDate) <= 0 && fileDate.compareTo(timeEnd) <= 0) {
+                    csvfiles.add(fileEntry.getName());
+                }
+                //System.out.println(fileEntry.getName());
+            }
+        }
+        return csvfiles;
+    }
+
+
 }
