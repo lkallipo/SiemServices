@@ -112,7 +112,7 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Server Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        response = handler.getExtraData("Current Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
         return response;
     }
     

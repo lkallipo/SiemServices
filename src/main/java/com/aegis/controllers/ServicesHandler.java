@@ -222,24 +222,38 @@ public class ServicesHandler {
                                    
                     
                     /* XL-SIEM adaptation*/
-                    /*int severitypos=0;
+                    int severitypos=0;
                     if(userDataValue.equals("Current Load")){
                         severitypos = extra.getUserdata1().indexOf("Current Load;")+13;
                     }
                     else if (userDataValue.equals("Total Processes")){
                         severitypos = extra.getUserdata1().indexOf("Total Processes;")+16;
                     }
-                    String currentEventSeverity = extra.getUserdata1().substring(severitypos,extra.getUserdata1().indexOf(";", severitypos));
-*/
+                    if (severitypos > 0){
+                        currentEventSeverity = extra.getUserdata1().substring(severitypos,extra.getUserdata1().indexOf(";", severitypos));
+                    }
+                    
                     if (severity) {
                         if (currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL")) {
                             isWarnOrError = true;
                         }
                     }
-                    TypedQuery<AcidEvent> query1;
-                    query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
-                    query1.setParameter("eventId", extra.getEventId());
-                    AcidEvent relatedAcidEvent = query1.getSingleResult();
+                    AcidEvent relatedAcidEvent = new AcidEvent();
+                    try{
+                        List<AcidEvent> relatedEvents;
+                        relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
+                        if (!relatedEvents.isEmpty()){
+                            relatedAcidEvent = relatedEvents.get(0);                    
+                        }                  
+                    }
+                    catch (Exception e) {
+                     System.out.println(e.getMessage());                   
+                    }
+                    
+                    if(relatedAcidEvent.getId() == null)
+                    {
+                        continue;
+                    }    
 
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
@@ -268,7 +282,7 @@ public class ServicesHandler {
                                     relatedAcidEvent.getSrcHostname());
 
                             switch (userDataValue) {
-                                case "Server Load":
+                                case "Current Load":
                                     {
                                         //if (userDataValue.equals("Current Load")) {
                                         String[] loadvalues = new String[3];
@@ -470,14 +484,13 @@ public class ServicesHandler {
         //*********************** Variables ***************************
         GetNetworkConnsResponse response = new GetNetworkConnsResponse();
         List<ExtraData> extraDataparamsList;
-        ArrayList<GetNetworkConnsListResponse> extraDataList;
+        ArrayList<GetNetworkConnsListResponse> extraDataList = new ArrayList<>();
       
         try {
             //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
             extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue +"%").getResultList();
 
-            if (!extraDataparamsList.isEmpty()) {
-                extraDataList = new ArrayList<>();
+            if (!extraDataparamsList.isEmpty()) {                
 
                 for (ExtraData extra : extraDataparamsList) {
 
@@ -489,19 +502,29 @@ public class ServicesHandler {
                             isWarnOrError = true;
                         }
                     }
-                    
+                    AcidEvent relatedAcidEvent = new AcidEvent();
                     try{
-                    TypedQuery<AcidEvent> query1;
+                        List<AcidEvent> relatedEvents;
+                        relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
+                        if (!relatedEvents.isEmpty()){
+                            relatedAcidEvent = relatedEvents.get(0);                    
+                        }
+                    /*TypedQuery<AcidEvent> query1;
                     query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
                     query1.setParameter("eventId", extra.getEventId());
                     Object objec = query1.getSingleResult();
-                   // AcidEvent relatedAcidEvent = query1.getSingleResult();
+                    relatedAcidEvent = query1.getSingleResult();*/
                     
                     }
                     catch (Exception e) {
-                     System.out.println(e.getMessage());         // Never gets here
+                     System.out.println(e.getMessage());                   
                     }
-                    AcidEvent relatedAcidEvent = null;
+                    
+                    if(relatedAcidEvent.getId() == null)
+                    {
+                        continue;
+                    }
+                    
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
                      */
@@ -548,8 +571,7 @@ public class ServicesHandler {
                     }
                 }
                 return response;
-            } else {
-                extraDataList = new ArrayList<>();
+            } else {                
                 response.setNetworkConnections(extraDataList);
                 return response;
             }
@@ -584,10 +606,24 @@ public class ServicesHandler {
                             isWarnOrError = true;
                         }
                     }
-                    TypedQuery<AcidEvent> query1;
-                    query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
-                    query1.setParameter("eventId", extra.getEventId());
-                    AcidEvent relatedAcidEvent = query1.getSingleResult();
+                    
+                    AcidEvent relatedAcidEvent = new AcidEvent();
+                    try{
+                        List<AcidEvent> relatedEvents;
+                        relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
+                        if (!relatedEvents.isEmpty()){
+                            relatedAcidEvent = relatedEvents.get(0);                    
+                        }                  
+                    }
+                    catch (Exception e) {
+                     System.out.println(e.getMessage());                   
+                    }
+                    
+                    if(relatedAcidEvent.getId() == null)
+                    {
+                        continue;
+                    }                    
+
 
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
@@ -673,10 +709,22 @@ public class ServicesHandler {
                             isWarnOrError = true;
                         }
                     }
-                    TypedQuery<AcidEvent> query1;
-                    query1 = (TypedQuery) em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId");
-                    query1.setParameter("eventId", extra.getEventId());
-                    AcidEvent relatedAcidEvent = query1.getSingleResult();
+                    AcidEvent relatedAcidEvent = new AcidEvent();
+                    try{
+                        List<AcidEvent> relatedEvents;
+                        relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
+                        if (!relatedEvents.isEmpty()){
+                            relatedAcidEvent = relatedEvents.get(0);                    
+                        }                  
+                    }
+                    catch (Exception e) {
+                     System.out.println(e.getMessage());                   
+                    }
+                    
+                    if(relatedAcidEvent.getId() == null)
+                    {
+                        continue;
+                    }    
 
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
@@ -775,7 +823,7 @@ public class ServicesHandler {
     public GetNetflowResponse getNetFlow(long startDate, long endDate) {
 
         GetNetflowResponse response = new GetNetflowResponse();        
-        ArrayList<GetNetflowListResponse> netflowList = new ArrayList<GetNetflowListResponse>();
+        ArrayList<GetNetflowListResponse> netflowList = new ArrayList<>();
         CSVReader reader = null;
         String netflowCsv = props.getProperty("netflowcsv");
         
