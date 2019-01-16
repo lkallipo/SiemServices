@@ -6,6 +6,7 @@
 package com.aegis.services;
 
 import com.aegis.controllers.ServicesHandler;
+import com.aegis.messages.CipiNVD3Chart;
 import com.aegis.messages.GetAcidEventsResponse;
 import com.aegis.messages.GetDevicesResponse;
 import com.aegis.messages.GetEventsTimeframeResponse;
@@ -134,6 +135,30 @@ public class SiemServices {
         long startTime = System.currentTimeMillis();
 
         response = handler.getExtraData("CPU Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        System.out.println(elapsedTime + "secs");
+        
+        return response;
+    }
+    
+        @GET
+    @Path("/getServerLoadnvd3")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public CipiNVD3Chart getServerLoadnvd3(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost, @QueryParam("severity") @DefaultValue("false") String severity) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        CipiNVD3Chart response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        /* CPU Load for HCPB pilot */
+        long startTime = System.currentTimeMillis();
+
+        response = handler.getExtraDataNvd3("CPU Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         System.out.println(elapsedTime + "secs");
