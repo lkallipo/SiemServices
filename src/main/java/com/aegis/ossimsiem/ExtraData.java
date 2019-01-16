@@ -10,9 +10,12 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -43,10 +46,10 @@ public class ExtraData implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @Basic(optional = false)
+    /*@Basic(optional = false)
     @NotNull
-    @Lob
-    @Column(name = "event_id")
+    @Lob*/
+    //@Column(name = "event_id")
     private byte[] eventId;
     @Size(max = 256)
     @Column(name = "filename")
@@ -92,11 +95,11 @@ public class ExtraData implements Serializable {
     @Column(name = "binary_data")
     private byte[] binaryData;
     
-    /*    
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne (optional = true)
+    @JoinColumn(name = "event_id",referencedColumnName ="id")
     @MapsId
     private AcidEvent relatedEvent;   
-    */
+    
 
     public ExtraData() {
     }
@@ -224,6 +227,15 @@ public class ExtraData implements Serializable {
     public void setBinaryData(byte[] binaryData) {
         this.binaryData = binaryData;
     }
+
+    public AcidEvent getRelatedEvent() {
+        return relatedEvent;
+    }
+
+    public void setRelatedEvent(AcidEvent relatedEvent) {
+        this.relatedEvent = relatedEvent;
+    }   
+    
 
     @Override
     public int hashCode() {

@@ -131,7 +131,13 @@ public class SiemServices {
         }
         handler = new ServicesHandler(em);
         /* CPU Load for HCPB pilot */
+        long startTime = System.currentTimeMillis();
+
         response = handler.getExtraData("CPU Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        System.out.println(elapsedTime + "secs");
+        
         return response;
     }
     

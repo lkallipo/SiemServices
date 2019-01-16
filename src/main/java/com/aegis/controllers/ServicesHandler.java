@@ -207,7 +207,7 @@ public class ServicesHandler {
       
         try {
             //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
-             extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue +"%").getResultList();
+             extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue +"%").getResultList();
 
             //extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.userdata1 LIKE :userdata1").setParameter("userdata1", "%" + userDataValue +"%").getResultList();
 
@@ -238,19 +238,8 @@ public class ServicesHandler {
                             isWarnOrError = true;
                         }
                     }
-                    AcidEvent relatedAcidEvent = new AcidEvent();
-                    try{
-                        List<AcidEvent> relatedEvents;
-                        relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
-                        if (!relatedEvents.isEmpty()){
-                            relatedAcidEvent = relatedEvents.get(0);                    
-                        }                  
-                    }
-                    catch (Exception e) {
-                     System.out.println(e.getMessage());                   
-                    }
-                    
-                    if(relatedAcidEvent.getId() == null)
+                                        
+                    if(extra.getRelatedEvent().getId() == null)
                     {
                         continue;
                     }    
@@ -259,7 +248,7 @@ public class ServicesHandler {
                        but if passed as a parameter then set it to it.
                      */
                    
-                    int checkDeviceId = relatedAcidEvent.getDeviceId();
+                    int checkDeviceId = extra.getRelatedEvent().getDeviceId();
                    // HCPB: check device id instead of srcHostname
                    
                    
@@ -271,15 +260,15 @@ public class ServicesHandler {
                     if (!severity || (severity && isWarnOrError)) {
                         //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
                         // HCPB: check device id instead of srcHostname
-                        if (relatedAcidEvent.getDeviceId() == checkDeviceId
-                                && relatedAcidEvent.getTimestamp().getTime() >= startDate
-                                && relatedAcidEvent.getTimestamp().getTime() <= endDate) {
+                        if (extra.getRelatedEvent().getDeviceId() == checkDeviceId
+                                && extra.getRelatedEvent().getTimestamp().getTime() >= startDate
+                                && extra.getRelatedEvent().getTimestamp().getTime() <= endDate) {
 
                             GetAcidEventsListResponse acideventResponse = new GetAcidEventsListResponse(
-                                    relatedAcidEvent.getId(),
-                                    relatedAcidEvent.getDeviceId(),
-                                    relatedAcidEvent.getTimestamp(),
-                                    relatedAcidEvent.getSrcHostname());
+                                    extra.getRelatedEvent().getId(),
+                                    extra.getRelatedEvent().getDeviceId(),
+                                    extra.getRelatedEvent().getTimestamp(),
+                                    extra.getRelatedEvent().getSrcHostname());
 
                             switch (userDataValue) {
                                 case "Current Load":
@@ -1324,9 +1313,13 @@ public class ServicesHandler {
                 listFilesForFolder(fileEntry, startDate, endDate);
             } else {
                 String fileName = fileEntry.getName();
+                System.out.println ("Processing file: " + fileName);
+                if(!fileName.contains("nfcapd")){
+                    continue;
+                }
                 String fileDate = fileName.substring(fileName.indexOf(".") + 1, fileName.indexOf(".csv"));
-                Long fileDateLong = Long.parseLong(fileDate);
-                 System.out.println("Start  End fileDateLong " + timeStart + "  " + timeEnd + " " + fileDateLong);  
+                //Long fileDateLong = Long.parseLong(fileDate);
+                 //System.out.println("Start    End    fileDateLong " + timeStart + "  " + timeEnd + "  " + fileDateLong);  
                 if (timeStart.compareTo(fileDate) <= 0 && fileDate.compareTo(timeEnd) <= 0) {
                     csvfiles.add(fileEntry.getName());
                 }

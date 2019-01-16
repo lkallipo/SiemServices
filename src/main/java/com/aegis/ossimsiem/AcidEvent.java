@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -128,7 +129,7 @@ public class AcidEvent implements Serializable {
     @Lob
     @Column(name = "dst_net")
     private byte[] dstNet;
-
+    
     public AcidEvent() {
     }
 
