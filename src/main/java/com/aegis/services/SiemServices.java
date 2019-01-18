@@ -65,7 +65,7 @@ public class SiemServices {
         response = handler.getDevices();
         return response;
     }
-    
+
     @GET
     @Path("/getAcidEvents")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -82,7 +82,7 @@ public class SiemServices {
         response = handler.getAcidEvents();
         return response;
     }
-    
+
     @GET
     @Path("/getEventsTimeframe")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -99,7 +99,7 @@ public class SiemServices {
         response = handler.getAcidEventsTimeframe();
         return response;
     }
-    
+
     @GET
     @Path("/getCurrentLoad")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -113,11 +113,10 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Current Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        response = handler.getExtraData("Current Load", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, Boolean.valueOf(severity));
         return response;
     }
-    
-        
+
     @GET
     @Path("/getServerLoad")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -134,15 +133,15 @@ public class SiemServices {
         /* CPU Load for HCPB pilot */
         long startTime = System.currentTimeMillis();
 
-        response = handler.getExtraData("CPU Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        response = handler.getExtraData("CPU Load", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, Boolean.valueOf(severity));
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         System.out.println(elapsedTime + "secs");
-        
+
         return response;
     }
-    
-        @GET
+
+    @GET
     @Path("/getServerLoadnvd3")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -158,14 +157,14 @@ public class SiemServices {
         /* CPU Load for HCPB pilot */
         long startTime = System.currentTimeMillis();
 
-        response = handler.getExtraDataNvd3("CPU Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        response = handler.getExtraDataNvd3("CPU Load", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, Boolean.valueOf(severity));
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         System.out.println(elapsedTime + "secs");
-        
+
         return response;
     }
-    
+
     @GET
     @Path("/getCurrentProcesses")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -179,10 +178,10 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Total Processes",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        response = handler.getExtraData("Total Processes", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, Boolean.valueOf(severity));
         return response;
     }
-    
+
     @GET
     @Path("/getCurrentUsers")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -196,10 +195,10 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("Current Users",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        response = handler.getExtraData("Current Users", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, Boolean.valueOf(severity));
         return response;
     }
-    
+
     @GET
     @Path("/getHttpStatus")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -213,16 +212,15 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getExtraData("HTTP",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, Boolean.valueOf(severity));
+        response = handler.getExtraData("HTTP", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, Boolean.valueOf(severity));
         return response;
     }
-    
-    
+
     @GET
     @Path("/getClosestValueByTime")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public GetExtraDataListResponse getClosestValueByTime(@QueryParam("cipi") String cipi, @QueryParam("timestamp") String timestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetExtraDataListResponse getClosestValueByTime(@QueryParam("cipi") String cipi, @QueryParam("timestamp") String timestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetExtraDataListResponse response;
@@ -231,14 +229,14 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getClosestValueByTime(cipi,Long.parseLong(timestamp),srcHost);
+        response = handler.getClosestValueByTime(cipi, Long.parseLong(timestamp), srcHost);
         return response;
     }
-    
+
     @GET
-    @Path("/getNetFlow")    
+    @Path("/getNetFlow")
     @Produces(MediaType.APPLICATION_JSON)
-    public GetNetflowResponse getNetFlow(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetNetflowResponse getNetFlow(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetNetflowResponse response;
@@ -247,14 +245,14 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getNetFlow(Long.parseLong(starttimestamp),Long.parseLong(endtimestamp)/*,srcHost*/);
+        response = handler.getNetFlow(Long.parseLong(starttimestamp), Long.parseLong(endtimestamp)/*,srcHost*/);
         return response;
     }
-    
+
     @GET
-    @Path("/getNetworkLoad")    
+    @Path("/getNetworkLoad")
     @Produces(MediaType.APPLICATION_JSON)
-    public GetNetworkLoadResponse getNetWorkLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetNetworkLoadResponse getNetWorkLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetNetworkLoadResponse response;
@@ -266,11 +264,11 @@ public class SiemServices {
         response = handler.getNetworkLoad(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),*/srcHost);
         return response;
     }
-    
+
     @GET
-    @Path("/getNetLoad")    
+    @Path("/getNetLoad")
     @Produces(MediaType.APPLICATION_JSON)
-    public GetNetworkLoadResponse getNetLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetNetworkLoadResponse getNetLoad(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetNetworkLoadResponse response;
@@ -279,16 +277,32 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getNetLoaddata("Network Load",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, false);
+        response = handler.getNetLoaddata("Network Load", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, false);
         return response;
     }
-    
+
     @GET
-    @Path("/logNetworkLoad")    
+    @Path("/getNetLoadNvd3")
     @Produces(MediaType.APPLICATION_JSON)
-    public SimpleResponse logNetWorkLoad(/*@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, */ @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public CipiNVD3Chart getNetLoadNvd3(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
-        ServicesHandler handler;       
+        ServicesHandler handler;
+        CipiNVD3Chart response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetLoaddataNvd3("Network Load", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, false);
+        return response;
+    }
+
+    @GET
+    @Path("/logNetworkLoad")
+    @Produces(MediaType.APPLICATION_JSON)
+    public SimpleResponse logNetWorkLoad(/*@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, */@QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
         SimpleResponse response;
         //*********************** Action ***************************
         if (em == null) {
@@ -297,12 +311,12 @@ public class SiemServices {
         handler = new ServicesHandler(em);
         response = handler.logNetworkLoad(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),*/srcHost);
         return response;
-    }    
-    
+    }
+
     @GET
-    @Path("/getNetworkConnections")    
+    @Path("/getNetworkConnections")
     @Produces(MediaType.APPLICATION_JSON)
-    public GetNetworkConnsResponse getNetworkConnections(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetNetworkConnsResponse getNetworkConnections(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetNetworkConnsResponse response;
@@ -314,12 +328,11 @@ public class SiemServices {
         response = handler.getNetworkConnections(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
         return response;
     }
-    
-        
+
     @GET
-    @Path("/getNetConnections")    
+    @Path("/getNetConnections")
     @Produces(MediaType.APPLICATION_JSON)
-    public GetNetworkConnsResponse getNetConnections(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetNetworkConnsResponse getNetConnections(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetNetworkConnsResponse response;
@@ -328,16 +341,32 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getNetConnectionsdata("Network Connections",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, false);
+        response = handler.getNetConnectionsdata("Network Connections", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, false);
         return response;
     }
-    
-     @GET
-    @Path("/logNetworkConnections")    
+
+    @GET
+    @Path("/getNetConnectionsNvd3")
     @Produces(MediaType.APPLICATION_JSON)
-    public SimpleResponse logNetWorkConnections(/*@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, */ @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public CipiNVD3Chart getNetConnectionsNvd3(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
-        ServicesHandler handler;       
+        ServicesHandler handler;
+        CipiNVD3Chart response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetConnectionsdataNvd3("Network Connections", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, false);
+        return response;
+    }
+
+    @GET
+    @Path("/logNetworkConnections")
+    @Produces(MediaType.APPLICATION_JSON)
+    public SimpleResponse logNetWorkConnections(/*@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, */@QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
         SimpleResponse response;
         //*********************** Action ***************************
         if (em == null) {
@@ -346,12 +375,12 @@ public class SiemServices {
         handler = new ServicesHandler(em);
         response = handler.logNetworkConnections(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),*/srcHost);
         return response;
-    }  
-    
+    }
+
     @GET
-    @Path("/getNetworkSpeed")    
+    @Path("/getNetworkSpeed")
     @Produces(MediaType.APPLICATION_JSON)
-    public GetNetworkSpeedResponse getNetworkSpeed(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetNetworkSpeedResponse getNetworkSpeed(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetNetworkSpeedResponse response;
@@ -363,11 +392,11 @@ public class SiemServices {
         response = handler.getNetworkSpeed(/*Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost*/);
         return response;
     }
-    
+
     @GET
-    @Path("/getNetSpeed")    
+    @Path("/getNetSpeed")
     @Produces(MediaType.APPLICATION_JSON)
-    public GetNetworkSpeedResponse getNetSpeed(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp,  @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public GetNetworkSpeedResponse getNetSpeed(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         GetNetworkSpeedResponse response;
@@ -376,14 +405,30 @@ public class SiemServices {
             init();
         }
         handler = new ServicesHandler(em);
-        response = handler.getNetSpeeddata("Network Speed",Long.parseLong(starttimestamp),Long.parseLong(endtimestamp),srcHost, false);
+        response = handler.getNetSpeeddata("Network Speed", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, false);
         return response;
     }
-    
+
     @GET
-    @Path("/logNetworkSpeed")    
+    @Path("/getNetSpeedNvd3")
     @Produces(MediaType.APPLICATION_JSON)
-    public SimpleResponse logNetworkSpeed(/*@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, */ @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+    public CipiNVD3Chart getNetSpeedNvd3(@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, @QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
+        //*********************** Variables ***************************
+        ServicesHandler handler;
+        CipiNVD3Chart response;
+        //*********************** Action ***************************
+        if (em == null) {
+            init();
+        }
+        handler = new ServicesHandler(em);
+        response = handler.getNetSpeeddataNvd3("Network Speed", Long.parseLong(starttimestamp), Long.parseLong(endtimestamp), srcHost, false);
+        return response;
+    }
+
+    @GET
+    @Path("/logNetworkSpeed")
+    @Produces(MediaType.APPLICATION_JSON)
+    public SimpleResponse logNetworkSpeed(/*@QueryParam("startTimestamp") String starttimestamp, @QueryParam("endTimestamp") String endtimestamp, */@QueryParam("srcHost") String srcHost) throws ClassNotFoundException {
         //*********************** Variables ***************************
         ServicesHandler handler;
         SimpleResponse response;

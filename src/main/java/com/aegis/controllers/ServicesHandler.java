@@ -207,10 +207,20 @@ public class ServicesHandler {
         ArrayList<GetHttpStatusResponse> httpResponseList = new ArrayList<GetHttpStatusResponse>();
         TypedQuery query;
 
+        /* Have a default because cloud xl-siem database cannot handle big resultset */
+        int deviceid = 9; // prototype
+        if (!srcHost.equals("any")) {
+               //checkHostName = srcHost;
+                deviceid = Integer.parseInt(srcHost);
+          }
+        
         try {
             //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
-            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue + "%").getResultList();
-
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE re.deviceId= :deviceId AND e.dataPayload LIKE :dataPayload")
+                                    .setParameter("deviceId", deviceid)
+                                    .setParameter("dataPayload", "%" + userDataValue + "%")
+                                    .getResultList();
+            
             //extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.userdata1 LIKE :userdata1").setParameter("userdata1", "%" + userDataValue +"%").getResultList();
             if (!extraDataparamsList.isEmpty()) {
                 extraDataList = new ArrayList<>();
@@ -479,12 +489,22 @@ public class ServicesHandler {
         List<CipiValuePair> load5m = new ArrayList();
         List<CipiValuePair> load15m = new ArrayList();
 
-        TypedQuery query;
-
+        TypedQuery query;    
+        
+        /* Have a default because cloud xl-siem database cannot handle big resultset */
+        int deviceid = 9; // prototype
+        if (!srcHost.equals("any")) {
+               //checkHostName = srcHost;
+                deviceid = Integer.parseInt(srcHost);
+          }
+        
         try {
             //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
-            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue + "%").getResultList();
-
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE re.deviceId= :deviceId AND e.dataPayload LIKE :dataPayload")
+                                    .setParameter("deviceId", deviceid)
+                                    .setParameter("dataPayload", "%" + userDataValue + "%")
+                                    .getResultList();
+            
             //extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.userdata1 LIKE :userdata1").setParameter("userdata1", "%" + userDataValue +"%").getResultList();
             if (!extraDataparamsList.isEmpty()) {
                 extraDataList = new ArrayList<>();
@@ -584,15 +604,15 @@ public class ServicesHandler {
 
                                         load1m.add(new CipiValuePair(
                                                 extra.getRelatedEvent().getTimestamp(),
-                                                loadvalues[0].trim().substring(loadvalues[0].indexOf(": ") + 2, loadvalues[0].indexOf("%"))
+                                                Float.parseFloat(loadvalues[0].trim().substring(loadvalues[0].indexOf(": ") + 2, loadvalues[0].indexOf("%")))
                                         ));
                                         load5m.add(new CipiValuePair(
                                                 extra.getRelatedEvent().getTimestamp(),
-                                                loadvalues[1].trim().substring(loadvalues[01].indexOf(": ") + 2, loadvalues[1].indexOf("%"))
+                                                Float.parseFloat(loadvalues[1].trim().substring(loadvalues[01].indexOf(": ") + 2, loadvalues[1].indexOf("%")))
                                         ));
                                         load15m.add(new CipiValuePair(
                                                 extra.getRelatedEvent().getTimestamp(),
-                                                loadvalues[2].trim().substring(loadvalues[2].indexOf(": ") + 2, loadvalues[2].indexOf("%"))
+                                                Float.parseFloat(loadvalues[2].trim().substring(loadvalues[2].indexOf(": ") + 2, loadvalues[2].indexOf("%")))
                                         ));
 
                                         /*extraDataList.add(new GetExtraDataListResponse(
@@ -770,9 +790,19 @@ public class ServicesHandler {
         List<ExtraData> extraDataparamsList;
         ArrayList<GetNetworkConnsListResponse> extraDataList = new ArrayList<>();
 
+        /* Have a default because cloud xl-siem database cannot handle big resultset */
+        int deviceid = 9; // prototype
+        if (!srcHost.equals("any")) {
+               //checkHostName = srcHost;
+                deviceid = Integer.parseInt(srcHost);
+          }
+        
         try {
             //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
-            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue + "%").getResultList();
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE re.deviceId= :deviceId AND e.dataPayload LIKE :dataPayload")
+                                    .setParameter("deviceId", deviceid)
+                                    .setParameter("dataPayload", "%" + userDataValue + "%")
+                                    .getResultList();
 
             if (!extraDataparamsList.isEmpty()) {
 
@@ -786,7 +816,7 @@ public class ServicesHandler {
                             isWarnOrError = true;
                         }
                     }
-                    AcidEvent relatedAcidEvent = new AcidEvent();
+                   /* AcidEvent relatedAcidEvent = new AcidEvent();
                     try {
                         List<AcidEvent> relatedEvents;
                         relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
@@ -798,19 +828,19 @@ public class ServicesHandler {
                     query1.setParameter("eventId", extra.getEventId());
                     Object objec = query1.getSingleResult();
                     relatedAcidEvent = query1.getSingleResult();*/
-
+/*
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
-                    }
+                    }*/
 
-                    if (relatedAcidEvent.getId() == null) {
+                    if (extra.getRelatedEvent().getId() == null) {
                         continue;
                     }
 
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
                      */
-                    int checkDeviceId = relatedAcidEvent.getDeviceId();
+                    int checkDeviceId = extra.getRelatedEvent().getDeviceId();
                     // HCPB: check device id instead of srcHostname
 
                     if (!srcHost.equals("any")) {
@@ -821,9 +851,9 @@ public class ServicesHandler {
                     if (!severity || (severity && isWarnOrError)) {
                         //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
                         // HCPB: check device id instead of srcHostname
-                        if (relatedAcidEvent.getDeviceId() == checkDeviceId
-                                && relatedAcidEvent.getTimestamp().getTime() >= startDate
-                                && relatedAcidEvent.getTimestamp().getTime() <= endDate) {
+                        if (extra.getRelatedEvent().getDeviceId() == checkDeviceId
+                                && extra.getRelatedEvent().getTimestamp().getTime() >= startDate
+                                && extra.getRelatedEvent().getTimestamp().getTime() <= endDate) {
 
                             switch (userDataValue) {
                                 case "Network Connections": {
@@ -859,6 +889,104 @@ public class ServicesHandler {
         return response;
     }//end getNetFlowdata
 
+    
+    /*
+    * Gets extradata that associated Event happened after startDate
+     */
+    public CipiNVD3Chart getNetConnectionsdataNvd3(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
+        //*********************** Variables ***************************
+        CipiNVD3Chart response = new CipiNVD3Chart();
+        List<ExtraData> extraDataparamsList;
+        ArrayList<GetNetworkConnsListResponse> extraDataList = new ArrayList<>();
+        
+        List<CipiSeries> cipiSeriesList = new ArrayList<>();
+        List<CipiValuePair> netconnsList = new ArrayList();  
+
+        /* Have a default because cloud xl-siem database cannot handle big resultset */
+        int deviceid = 9; // prototype
+        if (!srcHost.equals("any")) {
+               //checkHostName = srcHost;
+                deviceid = Integer.parseInt(srcHost);
+          }
+        
+        try {
+            //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE re.deviceId= :deviceId AND e.dataPayload LIKE :dataPayload")
+                                    .setParameter("deviceId", deviceid)
+                                    .setParameter("dataPayload", "%" + userDataValue + "%")
+                                    .getResultList();
+
+            if (!extraDataparamsList.isEmpty()) {
+
+                for (ExtraData extra : extraDataparamsList) {
+
+                    boolean isWarnOrError = false;
+                    String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+
+                    if (severity) {
+                        if (currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL")) {
+                            isWarnOrError = true;
+                        }
+                    }
+ 
+                    if (extra.getRelatedEvent().getId() == null) {
+                        continue;
+                    }
+
+                    /* Assign checkHostName the name of the event by default
+                       but if passed as a parameter then set it to it.
+                     */
+                    int checkDeviceId = extra.getRelatedEvent().getDeviceId();
+                    // HCPB: check device id instead of srcHostname
+
+                    if (!srcHost.equals("any")) {
+                        //checkHostName = srcHost;
+                        checkDeviceId = Integer.parseInt(srcHost);
+                    }
+
+                    if (!severity || (severity && isWarnOrError)) {
+                        //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
+                        // HCPB: check device id instead of srcHostname
+                        if (extra.getRelatedEvent().getDeviceId() == checkDeviceId
+                                && extra.getRelatedEvent().getTimestamp().getTime() >= startDate
+                                && extra.getRelatedEvent().getTimestamp().getTime() <= endDate) {
+
+                            switch (userDataValue) {
+                                case "Network Connections": {
+                                    String values = "";
+                                    String datetime = "";
+                                    if (extra.getDataPayload().contains("Network Connections")) {
+                                        values = extra.getUserdata2();
+                                        datetime = extra.getUserdata3();
+                                    }
+
+                                    if (!values.equals("")) {                                         
+                                        netconnsList.add(new CipiValuePair(
+                                                extra.getRelatedEvent().getTimestamp(),
+                                                Float.parseFloat(values)
+                                        ));
+                                    }
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                CipiSeries netconnsSeries = new CipiSeries("connections",netconnsList);
+                cipiSeriesList.add(netconnsSeries);                
+                response.setChart(cipiSeriesList);
+                return response;
+            } else {
+                return response;
+            }
+        } catch (Exception e) {
+        }
+        return response;
+    }//end getNetFlowdata
+    
+    
     /*
     * Gets extradata that associated Event happened after startDate
      */
@@ -867,11 +995,19 @@ public class ServicesHandler {
         GetNetworkLoadResponse response = new GetNetworkLoadResponse();
         List<ExtraData> extraDataparamsList;
         ArrayList<GetNetworkLoadListResponse> extraDataList;
-
+/* Have a default because cloud xl-siem database cannot handle big resultset */
+        int deviceid = 9; // prototype
+        if (!srcHost.equals("any")) {
+               //checkHostName = srcHost;
+                deviceid = Integer.parseInt(srcHost);
+          }
         try {
             //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
-            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue + "%").getResultList();
-
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE re.deviceId= :deviceId AND e.dataPayload LIKE :dataPayload")
+                                    .setParameter("deviceId", deviceid)
+                                    .setParameter("dataPayload", "%" + userDataValue + "%")
+                                    .getResultList();
+            
             if (!extraDataparamsList.isEmpty()) {
                 extraDataList = new ArrayList<>();
 
@@ -886,7 +1022,7 @@ public class ServicesHandler {
                         }
                     }
 
-                    AcidEvent relatedAcidEvent = new AcidEvent();
+                    /*AcidEvent relatedAcidEvent = new AcidEvent();
                     try {
                         List<AcidEvent> relatedEvents;
                         relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
@@ -895,9 +1031,9 @@ public class ServicesHandler {
                         }
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
-                    }
+                    }*/
 
-                    if (relatedAcidEvent.getId() == null) {
+                    if (extra.getRelatedEvent().getId() == null) {
                         continue;
                     }
 
@@ -905,7 +1041,7 @@ public class ServicesHandler {
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
                      */
-                    int checkDeviceId = relatedAcidEvent.getDeviceId();
+                    int checkDeviceId = extra.getRelatedEvent().getDeviceId();
                     // HCPB: check device id instead of srcHostname
 
                     if (!srcHost.equals("any")) {
@@ -916,9 +1052,9 @@ public class ServicesHandler {
                     if (!severity || (severity && isWarnOrError)) {
                         //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
                         // HCPB: check device id instead of srcHostname
-                        if (relatedAcidEvent.getDeviceId() == checkDeviceId
-                                && relatedAcidEvent.getTimestamp().getTime() >= startDate
-                                && relatedAcidEvent.getTimestamp().getTime() <= endDate) {
+                        if (extra.getRelatedEvent().getDeviceId() == checkDeviceId
+                                && extra.getRelatedEvent().getTimestamp().getTime() >= startDate
+                                && extra.getRelatedEvent().getTimestamp().getTime() <= endDate) {
 
                             switch (userDataValue) {
                                 case "Network Load": {
@@ -956,20 +1092,31 @@ public class ServicesHandler {
         }
         return response;
     }//end getNetLoaddata
-
+    
     /*
     * Gets extradata that associated Event happened after startDate
      */
-    public GetNetworkSpeedResponse getNetSpeeddata(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
+    public CipiNVD3Chart getNetLoaddataNvd3(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
         //*********************** Variables ***************************
-        GetNetworkSpeedResponse response = new GetNetworkSpeedResponse();
+        CipiNVD3Chart response = new CipiNVD3Chart();
         List<ExtraData> extraDataparamsList;
-        ArrayList<GetNetworkSpeedListResponse> extraDataList;
-
+        ArrayList<GetNetworkLoadListResponse> extraDataList;
+        
+        List<CipiSeries> cipiSeriesList = new ArrayList<>();
+        List<CipiValuePair> netloadList = new ArrayList();         
+        
+        /* Have a default because cloud xl-siem database cannot handle big resultset */
+        int deviceid = 9; // prototype
+        if (!srcHost.equals("any")) {
+               //checkHostName = srcHost;
+                deviceid = Integer.parseInt(srcHost);
+          }
         try {
-            //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
-            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e WHERE e.dataPayload LIKE :dataPayload").setParameter("dataPayload", "%" + userDataValue + "%").getResultList();
-
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE re.deviceId= :deviceId AND e.dataPayload LIKE :dataPayload")
+                                    .setParameter("deviceId", deviceid)
+                                    .setParameter("dataPayload", "%" + userDataValue + "%")
+                                    .getResultList();
+            
             if (!extraDataparamsList.isEmpty()) {
                 extraDataList = new ArrayList<>();
 
@@ -983,25 +1130,14 @@ public class ServicesHandler {
                             isWarnOrError = true;
                         }
                     }
-                    AcidEvent relatedAcidEvent = new AcidEvent();
-                    try {
-                        List<AcidEvent> relatedEvents;
-                        relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
-                        if (!relatedEvents.isEmpty()) {
-                            relatedAcidEvent = relatedEvents.get(0);
-                        }
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                    }
-
-                    if (relatedAcidEvent.getId() == null) {
+                    if (extra.getRelatedEvent().getId() == null) {
                         continue;
                     }
 
                     /* Assign checkHostName the name of the event by default
                        but if passed as a parameter then set it to it.
                      */
-                    int checkDeviceId = relatedAcidEvent.getDeviceId();
+                    int checkDeviceId = extra.getRelatedEvent().getDeviceId();
                     // HCPB: check device id instead of srcHostname
 
                     if (!srcHost.equals("any")) {
@@ -1012,9 +1148,117 @@ public class ServicesHandler {
                     if (!severity || (severity && isWarnOrError)) {
                         //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
                         // HCPB: check device id instead of srcHostname
-                        if (relatedAcidEvent.getDeviceId() == checkDeviceId
-                                && relatedAcidEvent.getTimestamp().getTime() >= startDate
-                                && relatedAcidEvent.getTimestamp().getTime() <= endDate) {
+                        if (extra.getRelatedEvent().getDeviceId() == checkDeviceId
+                                && extra.getRelatedEvent().getTimestamp().getTime() >= startDate
+                                && extra.getRelatedEvent().getTimestamp().getTime() <= endDate) {
+
+                            switch (userDataValue) {
+                                case "Network Load": {
+                                    String values = "";
+                                    String datetime = "";
+                                    Double packets = 0.0;
+                                    if (extra.getDataPayload().contains("Network Load")) {
+                                        values = extra.getUserdata2();
+                                        datetime = extra.getUserdata3();
+                                        packets = Double.parseDouble(values.substring(0, values.indexOf(" ")));
+                                    }
+
+                                    if (!values.equals("")) {
+                                        
+                                        netloadList.add(new CipiValuePair(
+                                                extra.getRelatedEvent().getTimestamp(),
+                                                Float.parseFloat(values.substring(0, values.indexOf(" ")))
+                                        ));                                                                               
+                                    }
+                                    
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                CipiSeries netloadSeries = new CipiSeries("packets/sec",netloadList);
+                cipiSeriesList.add(netloadSeries);                
+                response.setChart(cipiSeriesList);
+                
+                return response;
+            } else {
+                extraDataList = new ArrayList<>();
+                return response;
+            }
+        } catch (Exception e) {
+        }
+        return response;
+    }//end getNetLoaddata
+
+    /*
+    * Gets extradata that associated Event happened after startDate
+     */
+    public GetNetworkSpeedResponse getNetSpeeddata(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
+        //*********************** Variables ***************************
+        GetNetworkSpeedResponse response = new GetNetworkSpeedResponse();
+        List<ExtraData> extraDataparamsList;
+        ArrayList<GetNetworkSpeedListResponse> extraDataList;
+/* Have a default because cloud xl-siem database cannot handle big resultset */
+        int deviceid = 9; // prototype
+        if (!srcHost.equals("any")) {
+               //checkHostName = srcHost;
+                deviceid = Integer.parseInt(srcHost);
+          }
+        try {
+            //extraDataparamsList = em.createNamedQuery("ExtraData.findByUserdata2").setParameter("userdata2", userDataValue).getResultList();
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE re.deviceId= :deviceId AND e.dataPayload LIKE :dataPayload")
+                                    .setParameter("deviceId", deviceid)
+                                    .setParameter("dataPayload", "%" + userDataValue + "%")
+                                    .getResultList();
+            
+            if (!extraDataparamsList.isEmpty()) {
+                extraDataList = new ArrayList<>();
+
+                for (ExtraData extra : extraDataparamsList) {
+
+                    boolean isWarnOrError = false;
+                    String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+
+                    if (severity) {
+                        if (currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL")) {
+                            isWarnOrError = true;
+                        }
+                    }
+                    /*AcidEvent relatedAcidEvent = new AcidEvent();
+                    try {
+                        List<AcidEvent> relatedEvents;
+                        relatedEvents = em.createQuery("SELECT a FROM AcidEvent a WHERE a.id = :eventId").setParameter("eventId", extra.getEventId()).getResultList();
+                        if (!relatedEvents.isEmpty()) {
+                            relatedAcidEvent = relatedEvents.get(0);
+                        }
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }*/
+
+                    if (extra.getRelatedEvent().getId() == null) {
+                        continue;
+                    }
+
+                    /* Assign checkHostName the name of the event by default
+                       but if passed as a parameter then set it to it.
+                     */
+                    int checkDeviceId = extra.getRelatedEvent().getDeviceId();
+                    // HCPB: check device id instead of srcHostname
+
+                    if (!srcHost.equals("any")) {
+                        //checkHostName = srcHost;
+                        checkDeviceId = Integer.parseInt(srcHost);
+                    }
+
+                    if (!severity || (severity && isWarnOrError)) {
+                        //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
+                        // HCPB: check device id instead of srcHostname
+                        if (extra.getRelatedEvent().getDeviceId() == checkDeviceId
+                                && extra.getRelatedEvent().getTimestamp().getTime() >= startDate
+                                && extra.getRelatedEvent().getTimestamp().getTime() <= endDate) {
 
                             switch (userDataValue) {
                                 case "Network Speed": {
@@ -1053,6 +1297,107 @@ public class ServicesHandler {
         return response;
     }//end getNetSpeeddata
 
+    /*
+    * Gets extradata that associated Event happened after startDate
+     */
+    public CipiNVD3Chart getNetSpeeddataNvd3(String userDataValue, long startDate, long endDate, String srcHost, Boolean severity) {
+        //*********************** Variables ***************************
+        CipiNVD3Chart response = new CipiNVD3Chart();
+        List<ExtraData> extraDataparamsList;
+        ArrayList<GetNetworkLoadListResponse> extraDataList;
+        
+        List<CipiSeries> cipiSeriesList = new ArrayList<>();
+        List<CipiValuePair> netspeedList = new ArrayList(); 
+        
+ 
+        /* Have a default because cloud xl-siem database cannot handle big resultset */
+        int deviceid = 9; // prototype
+        if (!srcHost.equals("any")) {
+               //checkHostName = srcHost;
+                deviceid = Integer.parseInt(srcHost);
+          }
+        try {
+            extraDataparamsList = em.createQuery("SELECT e FROM ExtraData e inner join e.relatedEvent re WHERE re.deviceId= :deviceId AND e.dataPayload LIKE :dataPayload")
+                                    .setParameter("deviceId", deviceid)
+                                    .setParameter("dataPayload", "%" + userDataValue + "%")
+                                    .getResultList();
+            
+            if (!extraDataparamsList.isEmpty()) {
+                extraDataList = new ArrayList<>();
+
+                for (ExtraData extra : extraDataparamsList) {
+
+                    boolean isWarnOrError = false;
+                    String currentEventSeverity = extra.getUserdata1().substring(extra.getUserdata1().lastIndexOf(" ") + 1);
+
+                    if (severity) {
+                        if (currentEventSeverity.equals("WARNING") || currentEventSeverity.equals("CRITICAL")) {
+                            isWarnOrError = true;
+                        }
+                    }
+
+                    if (extra.getRelatedEvent().getId() == null) {
+                        continue;
+                    }
+
+                    /* Assign checkHostName the name of the event by default
+                       but if passed as a parameter then set it to it.
+                     */
+                    int checkDeviceId = extra.getRelatedEvent().getDeviceId();
+                    // HCPB: check device id instead of srcHostname
+
+                    if (!srcHost.equals("any")) {
+                        //checkHostName = srcHost;
+                        checkDeviceId = Integer.parseInt(srcHost);
+                    }
+
+                    if (!severity || (severity && isWarnOrError)) {
+                        //if (relatedAcidEvent.getSrcHostname().equals(checkHostName)                       
+                        // HCPB: check device id instead of srcHostname
+                        if (extra.getRelatedEvent().getDeviceId() == checkDeviceId
+                                && extra.getRelatedEvent().getTimestamp().getTime() >= startDate
+                                && extra.getRelatedEvent().getTimestamp().getTime() <= endDate) {
+
+                            switch (userDataValue) {
+                                case "Network Speed": {
+                                    String values = "";
+                                    String datetime = "";
+                                    Double bytes = 0.0;
+                                    if (extra.getDataPayload().contains("Network Speed")) {
+                                        values = extra.getUserdata2();
+                                        datetime = extra.getUserdata3();
+                                        bytes = Double.parseDouble(values.substring(0, values.indexOf(" ")));
+                                    }
+
+                                    if (!values.equals("")) {
+                                        
+                                        netspeedList.add(new CipiValuePair(
+                                                extra.getRelatedEvent().getTimestamp(),
+                                                Float.parseFloat(values.substring(0, values.indexOf(" ")))
+                                        ));
+                                    }
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                CipiSeries netloadSeries = new CipiSeries("bytes/sec",netspeedList);
+                cipiSeriesList.add(netloadSeries);                
+                response.setChart(cipiSeriesList);
+                return response;
+            } else {
+                extraDataList = new ArrayList<>();
+                return response;
+            }
+        } catch (Exception e) {
+        }
+        return response;
+    }//end getNetSpeeddata
+    
+    
     /*
     * Gets extradata that associated Event happened after startDate
      */

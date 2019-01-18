@@ -8,34 +8,37 @@ package com.aegis.messages;
 import java.util.Date;
 
 /**
- *
+ * Used to produce nvd3-specific format of json response
+ * 
  * @author lkallipolitis
- * @description user to produce nvd3-specific format of json response
+ *  
  */
 public class CipiValuePair {
 
-    private Date timestamp;
-    private String value;
+    private Date x;
+    private float y;
 
-    public CipiValuePair(Date timestamp, String value) {
-        this.timestamp = timestamp;
-        this.value = value;
-    }   
-
-    public Date getTimestamp() {
-        return timestamp;
+    public CipiValuePair(Date x, float y) {
+        this.x = x;
+        this.y = y;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public Date getX() {
+        return x;
     }
 
-    public String getLoadvalue() {
-        return value;
+    public void setX(Date x) {
+        this.x = x;
     }
 
-    public void setLoadvalue(String loadvalue) {
-        this.value = loadvalue;
+    public float getY() {
+        return y;
     }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+
 
 }

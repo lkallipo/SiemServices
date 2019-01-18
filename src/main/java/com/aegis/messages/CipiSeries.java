@@ -8,9 +8,9 @@ package com.aegis.messages;
 import java.util.List;
 
 /**
- *
- * @author lkallipolitis
- * @description user to produce nvd3-specific format of json response
+ * used to produce nvd3-specific format of json response
+ * 
+ * @author lkallipolitis 
  */
 public class CipiSeries {
 

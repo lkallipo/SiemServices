@@ -9,9 +9,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
+ * used to produce nvd3-specific format of json response
+ * 
  * @author lkallipolitis
- * @description user to produce nvd3-specific format of json response
+ * 
  */
 public class CipiNVD3Chart {
 
